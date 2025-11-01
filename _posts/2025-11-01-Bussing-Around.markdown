@@ -2,7 +2,7 @@
 
 layout: post
 title: "Huntress CTF 2025 - Bussing Around"
-categories: writeup forensics network 
+categories: writeup forensics 
 permalink: :categories/:title
 
 ---

@@ -2,11 +2,10 @@
 
 layout: post
 title: "Huntress CTF 2025 - Tabby's Date"
-categories: writeup forensics misc 
+categories: writeup forensics 
 permalink: :categories/:title
 
 ---
-
 
 ## Challenge Description
 

@@ -2,7 +2,7 @@
 
 layout: post
 title: "Huntress CTF 2025 - Snooze"
-categories: writeup forensics misc 
+categories: writeup misc 
 permalink: :categories/:title
 
 ---

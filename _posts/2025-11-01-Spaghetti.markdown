@@ -2,7 +2,7 @@
 
 layout: post
 title: "Huntress CTF 2025 - Spaghetti"
-categories: writeup forensics deobfuscation 
+categories: writeup malware 
 permalink: :categories/:title
 
 ---

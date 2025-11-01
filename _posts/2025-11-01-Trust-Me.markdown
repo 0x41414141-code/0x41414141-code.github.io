@@ -1,4 +1,13 @@
-## Challenge Prompt
+---
+
+layout: post
+title: "Huntress CTF 2025 - Trust Me"
+categories: writeup misc 
+permalink: :categories/:title
+
+---
+
+## Challenge Description
 
 >_C'mon bro, trust me! Just trust me!! Trust me bro!!!_
 >

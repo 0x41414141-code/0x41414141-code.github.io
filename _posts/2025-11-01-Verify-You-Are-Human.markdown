@@ -2,12 +2,10 @@
 
 layout: post
 title: "Huntress CTF 2025 - Verify You Are Human"
-categories: writeup forensics malware 
+categories: writeup malware 
 permalink: :categories/:title
 
 ---
-
-**Category:** Malware
 
 ## Challenge Description
 
