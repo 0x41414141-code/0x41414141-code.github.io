@@ -21,7 +21,7 @@ Provided IP: `10.1.182.225`
 
 After accessing the site we see this:
 
-[![](_site/assets/alerts.png)]
+[![](_site/assets/alerts.png)](_site/assets/alerts.png)
 
 We can download the zip file.
 
