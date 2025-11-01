@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>Huntress CTF 2025 - XMDR</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Huntress CTF 2025 - XMDR | Writeups</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Huntress CTF 2025 - XMDR" />
+<meta name="author" content="alphaz3r0" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Challenge Description" />
+<meta property="og:description" content="Challenge Description" />
+<link rel="canonical" href="http://localhost:4000/writeup/misc/XMDR" />
+<meta property="og:url" content="http://localhost:4000/writeup/misc/XMDR" />
+<meta property="og:site_name" content="Writeups" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-11-01T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Huntress CTF 2025 - XMDR" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"alphaz3r0","url":"0x41414141-code.github.io"},"dateModified":"2025-11-01T00:00:00+01:00","datePublished":"2025-11-01T00:00:00+01:00","description":"Challenge Description","headline":"Huntress CTF 2025 - XMDR","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/writeup/misc/XMDR"},"url":"http://localhost:4000/writeup/misc/XMDR"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    <h1>alphaz3r0@home:~$</h1>
+    </a>
+    <div class="header-links">
+      <a href="/archive"><h2 class="header-link">Archive</h2></a>
+<a href="/about"><h2 class="header-link">About</h2></a>
+
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>Huntress CTF 2025 - XMDR</h2>
+  <time datetime="2025-11-01T00:00:00+01:00" class="by-line">01 Nov 2025</time>
+  <h2 id="challenge-description">Challenge Description</h2>
+
+<blockquote>
+  <p>We had a lot of fun helping the Internet understand what MDRs are, but we thought of the&gt;next the best thing:<br />
+  <strong>why not have you <em>use one!</em></strong> 😄</p>
+</blockquote>
+
+<blockquote>
+  <p>A host that you protect had some strange alerts fire off… can you analyze and triage to find other malicious activity?</p>
+</blockquote>
+
+<p>Provided IP: <code class="language-plaintext highlighter-rouge">10.1.182.225</code></p>
+
+<hr />
+
+<p>After accessing the site we see this:</p>
+
+<p>![[alerts.png]]</p>
+
+<p>We can download the zip file.</p>
+
+<p>After looking through the GTRS folder we notice that is the Google Translate Reverse Shell</p>
+
+<p>I searched where are browser histories stored in windows system(for Google):
+<code class="language-plaintext highlighter-rouge">C:\Users\Administrator\AppData\Local\Google\Chrome\User Data\Default\History</code></p>
+
+<p>We don’t see the extension, so what kind of file is it?</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>History: SQLite 3.x database, last written using SQLite version 3050000, file counter 19, database pages 77, cookie 0x21  
+, schema 4, UTF-8, version-valid-for 19
+</code></pre></div></div>
+
+<p>after extracting link and URL decoding them I find these:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://translate.google.com/?sl=auto&amp;tl=en&amp;text=STARTCOMMAND  
+begin 664 -  
+,=&amp;%S:VQI&lt;W0@+W8*  
+`  
+end  
+ENDCOMMAND  
+&amp;op=translate
+</code></pre></div></div>
+
+<p>I went to the dcode.fr for their cipher identifier and it said it is UUencoded</p>
+
+<p>So I wrote a a script to url decode history links and to extract just the part between the 
+<code class="language-plaintext highlighter-rouge">begin 664 -</code> and <code class="language-plaintext highlighter-rouge">end</code></p>
+
+<h3 id="python">Python</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">sqlite3</span>  
+<span class="kn">import</span> <span class="nn">os</span>  
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>  
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">unquote</span>  
+<span class="kn">import</span> <span class="nn">re</span>  
+  
+<span class="k">def</span> <span class="nf">extract_chrome_history</span><span class="p">(</span><span class="n">history_path</span><span class="p">):</span>  
+<span class="err">   </span><span class="c1"># Chrome locks the history file, so we need to copy it  
+</span><span class="err">   </span><span class="kn">import</span> <span class="nn">shutil</span>  
+<span class="err">   </span><span class="n">temp_db</span> <span class="o">=</span> <span class="s">"temp_chrome_history.db"</span>  
+<span class="err">   </span><span class="n">shutil</span><span class="p">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">history_path</span><span class="p">,</span> <span class="n">temp_db</span><span class="p">)</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="n">temp_db</span><span class="p">)</span>  
+<span class="err">   </span><span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="n">cursor</span><span class="p">()</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="c1"># Query to get browsing history  
+</span><span class="err">   </span><span class="n">cursor</span><span class="p">.</span><span class="n">execute</span><span class="p">(</span><span class="s">"""  
+       SELECT    
+           urls.url,    
+           urls.title,    
+           urls.visit_count,    
+           urls.last_visit_time,    
+           visits.visit_time,  
+           visits.from_visit  
+       FROM urls    
+       LEFT JOIN visits ON urls.id = visits.url    
+       ORDER BY urls.last_visit_time DESC  
+   """</span><span class="p">)</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="n">history</span> <span class="o">=</span> <span class="n">cursor</span><span class="p">.</span><span class="n">fetchall</span><span class="p">()</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="k">print</span><span class="p">(</span><span class="s">"=== Extracted Content from Chrome History ==="</span><span class="p">)</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[:</span><span class="mi">50</span><span class="p">]:</span> <span class="err"> </span><span class="c1"># Show first 50 entries  
+</span><span class="err">       </span><span class="n">url</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">visit_count</span><span class="p">,</span> <span class="n">last_visit_time</span><span class="p">,</span> <span class="n">visit_time</span><span class="p">,</span> <span class="n">from_visit</span> <span class="o">=</span> <span class="n">entry</span>  
+<span class="err">        </span>  
+<span class="err">       </span><span class="c1"># URL decode the URL and title  
+</span><span class="err">       </span><span class="n">decoded_url</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">if</span> <span class="n">url</span> <span class="k">else</span> <span class="s">""</span>  
+<span class="err">       </span><span class="n">decoded_title</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">title</span><span class="p">)</span> <span class="k">if</span> <span class="n">title</span> <span class="k">else</span> <span class="s">""</span>  
+<span class="err">        </span>  
+<span class="err">       </span><span class="c1"># Extract content between "begin 664 -" and "end"  
+</span><span class="err">       </span><span class="n">begin_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s">"begin 664 -(.*?)end"</span>  
+<span class="err">       </span><span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="n">findall</span><span class="p">(</span><span class="n">begin_pattern</span><span class="p">,</span> <span class="n">decoded_url</span><span class="p">,</span> <span class="n">re</span><span class="p">.</span><span class="n">DOTALL</span><span class="p">)</span>  
+<span class="err">        </span>  
+<span class="err">       </span><span class="k">if</span> <span class="n">matches</span><span class="p">:</span>  
+<span class="err">           </span><span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>  
+<span class="err">               </span><span class="n">extracted_content</span> <span class="o">=</span> <span class="n">match</span><span class="p">.</span><span class="n">strip</span><span class="p">()</span>  
+<span class="err">               </span><span class="k">if</span> <span class="n">extracted_content</span><span class="p">:</span> <span class="err"> </span><span class="c1"># Only print if there's actual content  
+</span><span class="err">                   </span><span class="k">print</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>  
+<span class="err">                   </span><span class="k">print</span><span class="p">(</span><span class="n">extracted_content</span><span class="p">)</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="n">conn</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>  
+<span class="err">   </span><span class="n">os</span><span class="p">.</span><span class="n">remove</span><span class="p">(</span><span class="n">temp_db</span><span class="p">)</span> <span class="err"> </span><span class="c1"># Clean up  
+</span>  
+<span class="c1"># Usage - replace with your actual path  
+</span><span class="n">history_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s">"History"</span>  
+<span class="n">extract_chrome_history</span><span class="p">(</span><span class="n">history_path</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>And then just going online to find UUEncode Decoder and we get the flag:</p>
+
+<p>“L96-H;R!F;&amp;%G&gt;S8Y,C<code class="language-plaintext highlighter-rouge">P8S$S9&amp;-B,SED93$Y830P-64Y9#%F.3DS.#(Q?0H</code>”</p>
+
+<p>which when UUDecoded is:</p>
+
+<p><code class="language-plaintext highlighter-rouge">echo flag{69200c13dcb39de19a405e9d1f993821}</code></p>
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   
+
+  
+</body>
+
+</html>

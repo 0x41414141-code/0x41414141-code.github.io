@@ -1,7 +1,7 @@
 ---
 
 layout: post
-title: "Huntress CTF 2025 - Verify You Are Human"
+title: "Huntress CTF 2025 - XMDR"
 categories: writeup misc 
 permalink: :categories/:title
 
