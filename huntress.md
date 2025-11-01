@@ -4,7 +4,7 @@ title: Huntress CTF 2025 Challenges
 ---
 
 <section>
-  {% assign huntress_posts = site.pages | where_exp: "page", "page.title contains 'Huntress CTF 2025'" %}
+  {% assign huntress_posts = site.posts | where_exp: "page", "page.title contains 'Huntress CTF 2025'" %}
 
   {% if huntress_posts.size > 0 %}
     <h2>Huntress CTF 2025 Challenges</h2>
