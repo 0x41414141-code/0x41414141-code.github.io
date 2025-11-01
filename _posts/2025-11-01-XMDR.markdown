@@ -1,0 +1,125 @@
+---
+
+layout: post
+title: "Huntress CTF 2025 - Verify You Are Human"
+categories: writeup misc 
+permalink: :categories/:title
+
+---
+
+
+## Challenge Description
+
+>We had a lot of fun helping the Internet understand what MDRs are, but we thought of the>next the best thing:  
+  **why not have you _use one!_** 😄
+
+>A host that you protect had some strange alerts fire off... can you analyze and triage to find other malicious activity?
+
+Provided IP: `10.1.182.225`
+
+---
+
+After accessing the site we see this:
+
+![[alerts.png]]
+
+We can download the zip file.
+
+After looking through the GTRS folder we notice that is the Google Translate Reverse Shell
+
+I searched where are browser histories stored in windows system(for Google):
+`C:\Users\Administrator\AppData\Local\Google\Chrome\User Data\Default\History`
+
+We don't see the extension, so what kind of file is it?
+
+```
+History: SQLite 3.x database, last written using SQLite version 3050000, file counter 19, database pages 77, cookie 0x21  
+, schema 4, UTF-8, version-valid-for 19
+```
+
+after extracting link and URL decoding them I find these:
+
+```
+https://translate.google.com/?sl=auto&tl=en&text=STARTCOMMAND  
+begin 664 -  
+,=&%S:VQI<W0@+W8*  
+`  
+end  
+ENDCOMMAND  
+&op=translate
+```
+
+I went to the dcode.fr for their cipher identifier and it said it is UUencoded
+
+So I wrote a a script to url decode history links and to extract just the part between the 
+`begin 664 -` and `end`
+
+### Python
+
+```python
+import sqlite3  
+import os  
+from datetime import datetime, timedelta  
+from urllib.parse import unquote  
+import re  
+  
+def extract_chrome_history(history_path):  
+   # Chrome locks the history file, so we need to copy it  
+   import shutil  
+   temp_db = "temp_chrome_history.db"  
+   shutil.copy2(history_path, temp_db)  
+      
+   conn = sqlite3.connect(temp_db)  
+   cursor = conn.cursor()  
+      
+   # Query to get browsing history  
+   cursor.execute("""  
+       SELECT    
+           urls.url,    
+           urls.title,    
+           urls.visit_count,    
+           urls.last_visit_time,    
+           visits.visit_time,  
+           visits.from_visit  
+       FROM urls    
+       LEFT JOIN visits ON urls.id = visits.url    
+       ORDER BY urls.last_visit_time DESC  
+   """)  
+      
+   history = cursor.fetchall()  
+      
+   print("=== Extracted Content from Chrome History ===")  
+      
+   for entry in history[:50]:  # Show first 50 entries  
+       url, title, visit_count, last_visit_time, visit_time, from_visit = entry  
+          
+       # URL decode the URL and title  
+       decoded_url = unquote(url) if url else ""  
+       decoded_title = unquote(title) if title else ""  
+          
+       # Extract content between "begin 664 -" and "end"  
+       begin_pattern = r"begin 664 -(.*?)end"  
+       matches = re.findall(begin_pattern, decoded_url, re.DOTALL)  
+          
+       if matches:  
+           for match in matches:  
+               extracted_content = match.strip()  
+               if extracted_content:  # Only print if there's actual content  
+                   print("\n")  
+                   print(extracted_content)  
+      
+   conn.close()  
+   os.remove(temp_db)  # Clean up  
+  
+# Usage - replace with your actual path  
+history_path = r"History"  
+extract_chrome_history(history_path)
+```
+
+And then just going online to find UUEncode Decoder and we get the flag:
+
+"L96-H;R!F;&%G>S8Y,C`P8S$S9&-B,SED93$Y830P-64Y9#%F.3DS.#(Q?0H`"
+
+which when UUDecoded is:
+
+`echo flag{69200c13dcb39de19a405e9d1f993821}`
