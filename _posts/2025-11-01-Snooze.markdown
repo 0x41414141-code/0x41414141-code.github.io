@@ -1,12 +1,11 @@
 ---
+
 layout: post
 title: "Huntress CTF 2025 - Snooze"
 categories: writeup forensics misc 
 permalink: :categories/:title
 
 ---
-
-**Category:** Forensics
 
 ## Challenge Description
 

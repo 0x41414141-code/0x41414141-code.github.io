@@ -1,11 +1,13 @@
 ---
+
 layout: post
 title: "Huntress CTF 2025 - Spaghetti"
-categories: writeup forensics misc 
+categories: writeup forensics deobfuscation 
 permalink: :categories/:title
+
 ---
 
-## Challenge Prompt
+## Challenge Description
 
 > You know, I've been thinking... at the end of the day, spaghetti is really just strings of pasta!
 >
