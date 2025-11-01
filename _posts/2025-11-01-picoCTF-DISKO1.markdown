@@ -1,3 +1,12 @@
+---
+
+layout: post
+title: "PicoCTF - DISKO1"
+categories: writeup forensics 
+permalink: :categories/:title
+
+---
+
 # Writeup: DISKO 1
 
 ## Challenge Description

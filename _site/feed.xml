@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T20:44:57+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Bussing Around</title><link href="http://localhost:4000/writeup/forensics/Bussing-Around" rel="alternate" type="text/html" title="Huntress CTF 2025 - Bussing Around" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/Bussing-Around</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/Bussing-Around"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T20:50:44+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Bussing Around</title><link href="http://localhost:4000/writeup/forensics/Bussing-Around" rel="alternate" type="text/html" title="Huntress CTF 2025 - Bussing Around" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/Bussing-Around</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/Bussing-Around"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
 
 <blockquote>
   <p>One of the engineers noticed that an HMI was going haywire.</p>
@@ -1413,4 +1413,41 @@ ENDCOMMAND
 
 <p>which when UUDecoded is:</p>
 
-<p><code class="language-plaintext highlighter-rouge">echo flag{69200c13dcb39de19a405e9d1f993821}</code></p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="misc" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry></feed>
+<p><code class="language-plaintext highlighter-rouge">echo flag{69200c13dcb39de19a405e9d1f993821}</code></p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="misc" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">PicoCTF - DISKO1</title><link href="http://localhost:4000/writeup/forensics/picoCTF-DISKO1" rel="alternate" type="text/html" title="PicoCTF - DISKO1" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/picoCTF-DISKO1</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/picoCTF-DISKO1"><![CDATA[<h1 id="writeup-disko-1">Writeup: DISKO 1</h1>
+
+<h2 id="challenge-description">Challenge Description</h2>
+<blockquote>
+  <p><em>Can you find the flag in this disk image?</em></p>
+</blockquote>
+
+<p><strong>Challenge Files:</strong> <code class="language-plaintext highlighter-rouge">disk-1.dd</code></p>
+
+<h2 id="initial-recon--analysis">Initial Recon &amp; Analysis</h2>
+<ul>
+  <li><strong>Tools needed:</strong> grep, strings</li>
+</ul>
+
+<h2 id="solution-walkthrough">Solution Walkthrough</h2>
+
+<h3 id="step-1-understanding-the-challenge">Step 1: Understanding the Challenge</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Initial reconnaissance commands</span>
+file disko-1.dd
+
+disko-1.dd: DOS/MBR boot sector, code offset 0x58+2, OEM-ID <span class="s2">"mkfs.fat"</span>, Media descriptor 0xf8, sectors/track 32, heads 8, sectors 102400 <span class="o">(</span>volumes <span class="o">&gt;</span> 32 MB<span class="o">)</span>, FAT <span class="o">(</span>32 bit<span class="o">)</span>, sectors/FAT 788, serial number 0x241a4420, unlabeled
+
+</code></pre></div></div>
+
+<h3 id="step-2">Step 2:</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>strings disko-1.dd | <span class="nb">grep</span> <span class="s1">'picoCTF{.*}$'</span>
+picoCTF<span class="o">{</span>1t5_ju5t_4_5tr1n9_be6031da<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="flag">Flag</h2>
+
+<p><code class="language-plaintext highlighter-rouge">picoCTF{1t5_ju5t_4_5tr1n9_be6031da}</code></p>
+
+<h2 id="tools--references-used">Tools &amp; References Used</h2>
+<ul>
+  <li>strings</li>
+  <li>grep</li>
+</ul>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><summary type="html"><![CDATA[Writeup: DISKO 1]]></summary></entry></feed>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>PicoCTF - DISKO1</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>PicoCTF - DISKO1 | Writeups</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="PicoCTF - DISKO1" />
+<meta name="author" content="alphaz3r0" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Writeup: DISKO 1" />
+<meta property="og:description" content="Writeup: DISKO 1" />
+<link rel="canonical" href="http://localhost:4000/writeup/forensics/picoCTF-DISKO1" />
+<meta property="og:url" content="http://localhost:4000/writeup/forensics/picoCTF-DISKO1" />
+<meta property="og:site_name" content="Writeups" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-11-01T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="PicoCTF - DISKO1" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"alphaz3r0","url":"0x41414141-code.github.io"},"dateModified":"2025-11-01T00:00:00+01:00","datePublished":"2025-11-01T00:00:00+01:00","description":"Writeup: DISKO 1","headline":"PicoCTF - DISKO1","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/writeup/forensics/picoCTF-DISKO1"},"url":"http://localhost:4000/writeup/forensics/picoCTF-DISKO1"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    <h1>alphaz3r0@home:~$</h1>
+    </a>
+    <div class="header-links">
+      <a href="/archive"><h2 class="header-link">Archive</h2></a>
+<a href="/about"><h2 class="header-link">About</h2></a>
+<a href="/huntress"><h2 class="header-link">Huntress</h2></a>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>PicoCTF - DISKO1</h2>
+  <time datetime="2025-11-01T00:00:00+01:00" class="by-line">01 Nov 2025</time>
+  <h1 id="writeup-disko-1">Writeup: DISKO 1</h1>
+
+<h2 id="challenge-description">Challenge Description</h2>
+<blockquote>
+  <p><em>Can you find the flag in this disk image?</em></p>
+</blockquote>
+
+<p><strong>Challenge Files:</strong> <code class="language-plaintext highlighter-rouge">disk-1.dd</code></p>
+
+<h2 id="initial-recon--analysis">Initial Recon &amp; Analysis</h2>
+<ul>
+  <li><strong>Tools needed:</strong> grep, strings</li>
+</ul>
+
+<h2 id="solution-walkthrough">Solution Walkthrough</h2>
+
+<h3 id="step-1-understanding-the-challenge">Step 1: Understanding the Challenge</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Initial reconnaissance commands</span>
+file disko-1.dd
+
+disko-1.dd: DOS/MBR boot sector, code offset 0x58+2, OEM-ID <span class="s2">"mkfs.fat"</span>, Media descriptor 0xf8, sectors/track 32, heads 8, sectors 102400 <span class="o">(</span>volumes <span class="o">&gt;</span> 32 MB<span class="o">)</span>, FAT <span class="o">(</span>32 bit<span class="o">)</span>, sectors/FAT 788, serial number 0x241a4420, unlabeled
+
+</code></pre></div></div>
+
+<h3 id="step-2">Step 2:</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>strings disko-1.dd | <span class="nb">grep</span> <span class="s1">'picoCTF{.*}$'</span>
+picoCTF<span class="o">{</span>1t5_ju5t_4_5tr1n9_be6031da<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="flag">Flag</h2>
+
+<p><code class="language-plaintext highlighter-rouge">picoCTF{1t5_ju5t_4_5tr1n9_be6031da}</code></p>
+
+<h2 id="tools--references-used">Tools &amp; References Used</h2>
+<ul>
+  <li>strings</li>
+  <li>grep</li>
+</ul>
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   
+
+  
+</body>
+
+</html>
