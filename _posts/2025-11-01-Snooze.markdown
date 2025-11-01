@@ -1,0 +1,71 @@
+---
+layout: post
+title: "Huntress CTF 2025 - Snooze Writeup"
+categories: writeup forensics misc 
+permalink: :categories/:title
+
+---
+
+**Category:** Forensics
+
+## Challenge Description
+
+> Don't bug me, I'm sleeping! Zzzz... zzz... zzzz....
+>
+> Uncover the flag from the file presented.
+
+
+## Solution
+
+We are given one file named: `snooze`
+
+When I checked with the `file` command:
+
+{% highlight bash %}
+file snooze
+snooze: compress'd data 16 bits
+{% endhighlight %}
+
+When we cat the file, it shows gibberish. So instead we need to use hexdump (or similar tools) to inspect file signatures.
+
+{% highlight bash %}
+hexdump snooze
+
+0000000 9d1f 6690 84d8 b339 4c67 318c 6e30 c98c
+0000010 a301 998c 3530 e072 61b8 4c23 850e 6834
+0000020 918c 2621 8dc6 3088 9466 a3e9 0000
+000002d
+{% endhighlight %}
+The first bytes are 9d1f. Searching for this file signature reveals:
+
+    The file signature 1F 9D is the magic number for a compress file, often a tar.z archive compressed using the Lempel-Ziv-Welch algorithm.
+
+Now we see what extension is missing. We rename it to have the proper extension:
+
+{% highlight bash %}
+mv snooze snooze.z
+{% endhighlight %}
+
+Searching online to see how to extract .z files:
+
+    To unzip a .z file, you can use the command-line utility gunzip
+
+Let's try that:
+
+{% highlight bash %}
+gunzip snooze.z
+
+file snooze
+snooze: ASCII text
+
+{% endhighlight %}
+Great! Now it's identified as ASCII text. Let's see what's inside:
+
+{% highlight bash %}
+cat snooze
+flag{c1c07c90efa59876a97c44c2b175903e}
+
+{% endhighlight %}
+Conclusion
+
+This challenge looked pretty easy but it teaches an important topic about `file signatures` and how to identify file types by their magic bytes when the extension is missing or incorrect.
