@@ -57,7 +57,7 @@ sort -nr
   2274 10  
   2240 4  
   2224
-  ```
+```
 
 
 After analyzing all three registers:
