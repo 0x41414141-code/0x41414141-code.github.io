@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>Huntress CTF 2025 - Bussing Around</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Huntress CTF 2025 - Bussing Around | Writeups</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Huntress CTF 2025 - Bussing Around" />
+<meta name="author" content="alphaz3r0" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Challenge Description" />
+<meta property="og:description" content="Challenge Description" />
+<link rel="canonical" href="http://localhost:4000/writeup/forensics/network/Bussing-Around" />
+<meta property="og:url" content="http://localhost:4000/writeup/forensics/network/Bussing-Around" />
+<meta property="og:site_name" content="Writeups" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-11-01T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Huntress CTF 2025 - Bussing Around" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"alphaz3r0","url":"0x41414141-code.github.io"},"dateModified":"2025-11-01T00:00:00+01:00","datePublished":"2025-11-01T00:00:00+01:00","description":"Challenge Description","headline":"Huntress CTF 2025 - Bussing Around","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/writeup/forensics/network/Bussing-Around"},"url":"http://localhost:4000/writeup/forensics/network/Bussing-Around"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    <h1>alphaz3r0@home:~$</h1>
+    </a>
+    <div class="header-links">
+      <a href="/archive"><h2 class="header-link">Archive</h2></a>
+<a href="/about"><h2 class="header-link">About</h2></a>
+
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>Huntress CTF 2025 - Bussing Around</h2>
+  <time datetime="2025-11-01T00:00:00+01:00" class="by-line">01 Nov 2025</time>
+  <h2 id="challenge-description">Challenge Description</h2>
+
+<blockquote>
+  <p>One of the engineers noticed that an HMI was going haywire.</p>
+
+  <p>He took a packet capture of some of the traffic but he can’t make any sense of it… it just looks like gibberish!</p>
+
+  <p>For some reason, some of the traffic seems to be coming from someone’s computer. Can you help us figure out what’s going on?</p>
+</blockquote>
+
+<p>Provided files: <code class="language-plaintext highlighter-rouge">bussing_around.pcapng</code></p>
+
+<hr />
+
+<p>When we open a file <code class="language-plaintext highlighter-rouge">bussing_around.pcapng</code> with the tool wireshark we see that there are a lot of <code class="language-plaintext highlighter-rouge">modbus</code> packages recorded. Because this challenge will be done easier with tshark we should get familiar with it:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tshark -r capture.pcapng -z io,phs
+
+===================================================================  
+Protocol Hierarchy Statistics  
+Filter:    
+  
+frame                                    frames:16909 bytes:1251252  
+ eth                                    frames:16909 bytes:1251252  
+   ipv6                                 frames:1 bytes:142  
+     icmpv6                             frames:1 bytes:142  
+   arp                                  frames:2 bytes:102  
+   ip                                   frames:16906 bytes:1251008  
+     tcp                                frames:16906 bytes:1251008  
+       mbtcp                            frames:11266 bytes:878748  
+         modbus                         frames:11266 bytes:878748  
+===================================================================
+</code></pre></div></div>
+
+<p>This shows a hierarchical breakdown of all protocols in the capture file with percentages.</p>
+
+<p>After some googling to understand how Modbus works:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Modbus is an industrial communication protocol that enables data exchange between electronic devices, most commonly in building and manufacturing automation. It works on a request-response model where a client device sends a request to one or more server devices, which then respond with the requested data or a status acknowledgment
+</code></pre></div></div>
+
+<p>After looking at the provided file we can notice that there are only 3 registers used: 0,4 and 10.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>eurus@archlinux:~/Documents/day18$ tshark -r capture.pcapng -Y "modbus" -T fields -e modbus.regnum16 | sort | uniq -c |  
+sort -nr  
+  4528 0  
+  2274 10  
+  2240 4  
+  2224
+</code></pre></div></div>
+
+<p>After analyzing all three registers:</p>
+<ul>
+  <li>Register 4: Had diverse values but no obvious pattern</li>
+  <li>Register 10: Values were in ASCII range but didn’t form coherent text</li>
+  <li>Register 0: Only two values with high frequency</li>
+</ul>
+
+<p>The binary nature of Register 0 stood out as the most likely candidate for hidden data, since binary is the fundamental language of computers and perfect for encoding files.</p>
+
+<p>I concatenated the sequential 0 and 1 values into a continuous binary string, then grouped them into 8-bit chunks (bytes). Each byte was converted from binary to its decimal value, creating a byte array that was written directly to disk as a file.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tshark -r capture.pcapng -Y "modbus.regnum16 == 0 and tcp.dstport==502" -T fields -e  
+modbus.regval_uint16 | tr -d '\n' &gt; binary.txt
+</code></pre></div></div>
+
+<p>added the destination port to not get duplicates with same value in both request and response.</p>
+
+<p>Then I wrote a simple script that will get the 0s and 1s and save them to a file:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 <span class="nt">-c</span> <span class="s2">"b=open('binary.txt').read().replace(' ','').replace('</span><span class="se">\n</span><span class="s2">',''); open('flag','wb').write(int(b,2).to_bytes(len(b)//8,'big'))"</span>
+</code></pre></div></div>
+
+<p>Running a [[file]] command we see this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>file flag  
+flag: Zip archive data, at least v1.0 to extract, compression method=store
+</code></pre></div></div>
+
+<p>When we try to extract it we also see this comment:
+<code class="language-plaintext highlighter-rouge">Comment = The password is 5939f3ec9d820f23df20948af09a5682 .</code></p>
+
+<p>And <code class="language-plaintext highlighter-rouge">flag.txt</code> gets extracted - <code class="language-plaintext highlighter-rouge">flag{4d2a66c5ed8bb8cd4e4e1ab32c71f7a3}</code> :)</p>
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   
+
+  
+</body>
+
+</html>

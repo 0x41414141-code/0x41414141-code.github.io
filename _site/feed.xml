@@ -1,6 +1,86 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T14:50:05+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Snooze</title><link href="http://localhost:4000/writeup/forensics/misc/Snooze" rel="alternate" type="text/html" title="Huntress CTF 2025 - Snooze" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/misc/Snooze</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/misc/Snooze"><![CDATA[<p><strong>Category:</strong> Forensics</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T15:40:49+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Bussing Around</title><link href="http://localhost:4000/writeup/forensics/network/Bussing-Around" rel="alternate" type="text/html" title="Huntress CTF 2025 - Bussing Around" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/network/Bussing-Around</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/network/Bussing-Around"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
 
-<h2 id="challenge-description">Challenge Description</h2>
+<blockquote>
+  <p>One of the engineers noticed that an HMI was going haywire.</p>
+
+  <p>He took a packet capture of some of the traffic but he can’t make any sense of it… it just looks like gibberish!</p>
+
+  <p>For some reason, some of the traffic seems to be coming from someone’s computer. Can you help us figure out what’s going on?</p>
+</blockquote>
+
+<p>Provided files: <code class="language-plaintext highlighter-rouge">bussing_around.pcapng</code></p>
+
+<hr />
+
+<p>When we open a file <code class="language-plaintext highlighter-rouge">bussing_around.pcapng</code> with the tool wireshark we see that there are a lot of <code class="language-plaintext highlighter-rouge">modbus</code> packages recorded. Because this challenge will be done easier with tshark we should get familiar with it:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tshark -r capture.pcapng -z io,phs
+
+===================================================================  
+Protocol Hierarchy Statistics  
+Filter:    
+  
+frame                                    frames:16909 bytes:1251252  
+ eth                                    frames:16909 bytes:1251252  
+   ipv6                                 frames:1 bytes:142  
+     icmpv6                             frames:1 bytes:142  
+   arp                                  frames:2 bytes:102  
+   ip                                   frames:16906 bytes:1251008  
+     tcp                                frames:16906 bytes:1251008  
+       mbtcp                            frames:11266 bytes:878748  
+         modbus                         frames:11266 bytes:878748  
+===================================================================
+</code></pre></div></div>
+
+<p>This shows a hierarchical breakdown of all protocols in the capture file with percentages.</p>
+
+<p>After some googling to understand how Modbus works:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Modbus is an industrial communication protocol that enables data exchange between electronic devices, most commonly in building and manufacturing automation. It works on a request-response model where a client device sends a request to one or more server devices, which then respond with the requested data or a status acknowledgment
+</code></pre></div></div>
+
+<p>After looking at the provided file we can notice that there are only 3 registers used: 0,4 and 10.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>eurus@archlinux:~/Documents/day18$ tshark -r capture.pcapng -Y "modbus" -T fields -e modbus.regnum16 | sort | uniq -c |  
+sort -nr  
+  4528 0  
+  2274 10  
+  2240 4  
+  2224
+</code></pre></div></div>
+
+<p>After analyzing all three registers:</p>
+<ul>
+  <li>Register 4: Had diverse values but no obvious pattern</li>
+  <li>Register 10: Values were in ASCII range but didn’t form coherent text</li>
+  <li>Register 0: Only two values with high frequency</li>
+</ul>
+
+<p>The binary nature of Register 0 stood out as the most likely candidate for hidden data, since binary is the fundamental language of computers and perfect for encoding files.</p>
+
+<p>I concatenated the sequential 0 and 1 values into a continuous binary string, then grouped them into 8-bit chunks (bytes). Each byte was converted from binary to its decimal value, creating a byte array that was written directly to disk as a file.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tshark -r capture.pcapng -Y "modbus.regnum16 == 0 and tcp.dstport==502" -T fields -e  
+modbus.regval_uint16 | tr -d '\n' &gt; binary.txt
+</code></pre></div></div>
+
+<p>added the destination port to not get duplicates with same value in both request and response.</p>
+
+<p>Then I wrote a simple script that will get the 0s and 1s and save them to a file:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 <span class="nt">-c</span> <span class="s2">"b=open('binary.txt').read().replace(' ','').replace('</span><span class="se">\n</span><span class="s2">',''); open('flag','wb').write(int(b,2).to_bytes(len(b)//8,'big'))"</span>
+</code></pre></div></div>
+
+<p>Running a [[file]] command we see this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>file flag  
+flag: Zip archive data, at least v1.0 to extract, compression method=store
+</code></pre></div></div>
+
+<p>When we try to extract it we also see this comment:
+<code class="language-plaintext highlighter-rouge">Comment = The password is 5939f3ec9d820f23df20948af09a5682 .</code></p>
+
+<p>And <code class="language-plaintext highlighter-rouge">flag.txt</code> gets extracted - <code class="language-plaintext highlighter-rouge">flag{4d2a66c5ed8bb8cd4e4e1ab32c71f7a3}</code> :)</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="network" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Snooze</title><link href="http://localhost:4000/writeup/forensics/misc/Snooze" rel="alternate" type="text/html" title="Huntress CTF 2025 - Snooze" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/misc/Snooze</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/misc/Snooze"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
 
 <blockquote>
   <p>Don’t bug me, I’m sleeping! Zzzz… zzz… zzzz….</p>
@@ -54,7 +134,7 @@ flag<span class="o">{</span>c1c07c90efa59876a97c44c2b175903e<span class="o">}</s
 
 <p>Conclusion</p>
 
-<p>This challenge looked pretty easy but it teaches an important topic about <code class="language-plaintext highlighter-rouge">file signatures</code> and how to identify file types by their magic bytes when the extension is missing or incorrect.</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="misc" /><summary type="html"><![CDATA[Category: Forensics]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Spaghetti</title><link href="http://localhost:4000/writeup/forensics/misc/Spaghetti" rel="alternate" type="text/html" title="Huntress CTF 2025 - Spaghetti" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/misc/Spaghetti</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/misc/Spaghetti"><![CDATA[<h2 id="challenge-prompt">Challenge Prompt</h2>
+<p>This challenge looked pretty easy but it teaches an important topic about <code class="language-plaintext highlighter-rouge">file signatures</code> and how to identify file types by their magic bytes when the extension is missing or incorrect.</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="misc" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Spaghetti</title><link href="http://localhost:4000/writeup/forensics/deobfuscation/Spaghetti" rel="alternate" type="text/html" title="Huntress CTF 2025 - Spaghetti" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/deobfuscation/Spaghetti</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/deobfuscation/Spaghetti"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
 
 <blockquote>
   <p>You know, I’ve been thinking… at the end of the day, spaghetti is really just strings of pasta!</p>
@@ -305,7 +385,7 @@ AmsiScanBuffer
 flag{b313794dcef335da6206d54af81b6203}
 </code></pre></div></div>
 
-<p>And here is the 3rd and final flag.</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="misc" /><summary type="html"><![CDATA[Challenge Prompt]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Verify You Are Human</title><link href="http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human" rel="alternate" type="text/html" title="Huntress CTF 2025 - Verify You Are Human" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human"><![CDATA[<p><strong>Category:</strong> Malware</p>
+<p>And here is the 3rd and final flag.</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="deobfuscation" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Verify You Are Human</title><link href="http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human" rel="alternate" type="text/html" title="Huntress CTF 2025 - Verify You Are Human" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human"><![CDATA[<p><strong>Category:</strong> Malware</p>
 
 <h2 id="challenge-description">Challenge Description</h2>
 

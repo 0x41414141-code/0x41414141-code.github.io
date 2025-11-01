@@ -31,7 +31,10 @@ To recover an unsaved Notepad file, navigate to the hidden `%AppData%` folder in
 
 Navigating
 ```
-eurus@archlinux:~/Documents/tabbys/C/Users/Tabby/AppData/Local/Packages/Microsoft.WindowsNotepad_8wekyb3d8bbwe/LocalState/TabState$ ls
+pwd
+/Documents/tabbys/C/Users/Tabby/AppData/Local/Packages/Microsoft.WindowsNotepad_8wekyb3d8bbwe/LocalState/TabState
+
+ls
 002d2531-9aff-42b1-b54d-b178c88063b4.bin  9e96bd4b-4155-4558-b97a-edcdf01d4584.bin
 04165ca3-c82b-42ca-ab07-0c774ae66efd.bin  a16d5079-b2f7-4a54-b3d5-b32256c4f238.bin
 056941ef-d51d-4e57-9a55-b59d58bf3fcb.bin  a2048a5f-5cb5-460d-8ce6-70899de24d9c.bin
@@ -58,7 +61,7 @@ Wrote a simple script to hexdump it:
 
 ## Solution(Bash)
 
-```
+```bash
 #!/bin/bash
 
 # Loop through all .bin files in the current directory
