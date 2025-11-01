@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T16:23:24+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Bussing Around</title><link href="http://localhost:4000/writeup/forensics/network/Bussing-Around" rel="alternate" type="text/html" title="Huntress CTF 2025 - Bussing Around" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/network/Bussing-Around</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/network/Bussing-Around"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T16:47:06+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Bussing Around</title><link href="http://localhost:4000/writeup/forensics/network/Bussing-Around" rel="alternate" type="text/html" title="Huntress CTF 2025 - Bussing Around" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/network/Bussing-Around</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/network/Bussing-Around"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
 
 <blockquote>
   <p>One of the engineers noticed that an HMI was going haywire.</p>
@@ -1226,7 +1226,7 @@ Clean flag: flag<span class="o">{</span>d341b8d2c96e9cc96965afbf5675fc26<span cl
 
 <p>After accessing the site we see this:</p>
 
-<p>![[alerts.png]]</p>
+<p><img src="../../_site/assets/alerts.png" alt="" /></p>
 
 <p>We can download the zip file.</p>
 
