@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T16:47:06+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Bussing Around</title><link href="http://localhost:4000/writeup/forensics/network/Bussing-Around" rel="alternate" type="text/html" title="Huntress CTF 2025 - Bussing Around" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/network/Bussing-Around</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/network/Bussing-Around"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T16:58:02+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Bussing Around</title><link href="http://localhost:4000/writeup/forensics/network/Bussing-Around" rel="alternate" type="text/html" title="Huntress CTF 2025 - Bussing Around" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/network/Bussing-Around</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/network/Bussing-Around"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
 
 <blockquote>
   <p>One of the engineers noticed that an HMI was going haywire.</p>
@@ -681,7 +681,98 @@ So i grep for f.l.a.g and remove dots like this:</p>
 000002d0: 3500 3400 6300 3400 6100 3500 3800 7d00  54c4a58<span class="o">}</span>
 000002e0: 0d00 0d00 6800 6500 1920 7300 2000 7300  he s s
 
-</code></pre></div></div>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="misc" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Verify You Are Human</title><link href="http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human" rel="alternate" type="text/html" title="Huntress CTF 2025 - Verify You Are Human" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human"><![CDATA[<p><strong>Category:</strong> Malware</p>
+</code></pre></div></div>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="misc" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Trust Me</title><link href="http://localhost:4000/Trust-Me" rel="alternate" type="text/html" title="Trust Me" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/Trust-Me</id><content type="html" xml:base="http://localhost:4000/Trust-Me"><![CDATA[<h2 id="challenge-prompt">Challenge Prompt</h2>
+
+<blockquote>
+  <p><em>C’mon bro, trust me! Just trust me!! Trust me bro!!!</em></p>
+
+  <p>The <strong><code class="language-plaintext highlighter-rouge">TrustMe.exe</code></strong> program on this Windows desktop <em>“doesn’t trust me?”</em></p>
+
+  <p>It says it will give me the flag, but only if I “have the permissions of <strong>Trusted Installer</strong>“…?</p>
+</blockquote>
+
+<hr />
+
+<h2 id="thought-process">Thought process:</h2>
+
+<p>We are give a RDP connection and there is a file <code class="language-plaintext highlighter-rouge">TrustMe.exe</code></p>
+
+<p>When we try to execute it we get this:</p>
+
+<p><img src="../../images/access_denied.png" alt="" /></p>
+
+<p>After searching for Trusted Installer, ctf and writeup</p>
+
+<p>I came accross this video from John Hammond:
+https://www.youtube.com/watch?v=Vj1uh89v-Sc</p>
+
+<p>But in that video he was able to just execute commands in cmd, so i transfer this file from rdp to my host machine and started static analysis.</p>
+
+<p>always make backup copy of the file you are working with to not mess with its integrity:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp TrustMe.exe TrustMe.exe.orig.exe
+cp TrustMe.exe TrustMe.exe.patched.exe
+</code></pre></div></div>
+
+<p>While doing static analysis i came across mentions of <code class="language-plaintext highlighter-rouge">C:\ctf\key.bin</code></p>
+
+<p>And then I remembered the video of John, the file is also “owned” by TrustedInstaller so we can use what we learned in that video to read it as  TrustedInstaller.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sc.exe config TrustedInstaller binpath= '"C:\Windows\System32\cmd.exe" /c type "C:\ctf\key.bin" &gt; "C:\Users\Public\key.bin"'
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>started the service 
+
+&gt; sc.exe start TrustedInstaller
+</code></pre></div></div>
+
+<p>And inspected the bytes:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># prints hex bytes
+Get-Content -Path C:\Users\Public\key.bin -Encoding Byte -ReadCount 0 |
+  ForEach-Object { ($_ | ForEach-Object { "{0:X2}" -f $_ }) -join " " }
+</code></pre></div></div>
+
+<p>And we get this:
+<code class="language-plaintext highlighter-rouge">C5C93BDB841534FAE5545EDCB0F12041D10CD4D90EE16A7D8235FA657C93825D</code></p>
+
+<p>AES key? That sounds important!</p>
+
+<p>But this was probably rabbit hole because there were 2 bytes missing from the encrypted string that is at the start of the file that i belive is encrypted flag “Wx6eETGXddnmCT4qZ7BxgRYpC+kdjjFzXxW+BM4HiI3GPaslpFBnpk9XplnaSxNg”</p>
+
+<p>Because after Decrypting the string with the key we get this
+<code class="language-plaintext highlighter-rouge">95d526595e62cf1f4d82a}</code></p>
+
+<p>After solving the challenge i checked and in fact it was the right flag just missing some characters for now I am not sure why.</p>
+
+<p>So now we are at the starting line again</p>
+
+<hr />
+
+<p>After going through disassembly code I found this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x140001468 cmp dword [IsMember], r14d 
+0x14000146d 75 31 jne 0x1400014a0
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">0x75 0x31</code> is <code class="language-plaintext highlighter-rouge">jne +0x31</code>. We could changed <code class="language-plaintext highlighter-rouge">0x75</code> → <code class="language-plaintext highlighter-rouge">0xEB</code> (opcode for <code class="language-plaintext highlighter-rouge">jmp short</code>) leaving the relative offset <code class="language-plaintext highlighter-rouge">0x31</code> unchanged. The two‑byte instruction length is preserved.</p>
+
+<p><strong>Byte-level change</strong>:</p>
+
+<ul>
+  <li>VA: <code class="language-plaintext highlighter-rouge">0x14000146d</code></li>
+  <li>Original bytes: <code class="language-plaintext highlighter-rouge">75 31</code></li>
+  <li>Patched bytes: <code class="language-plaintext highlighter-rouge">EB 31</code></li>
+</ul>
+
+<p>This will turns <code class="language-plaintext highlighter-rouge">jne 0x1400014a0</code> into <code class="language-plaintext highlighter-rouge">jmp 0x1400014a0</code> (i.e., unconditional branch to success block).</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>r2 -w -c 's 0x14000146d; px 2; wx eb; px 2; wq' TrustMe.exe.patched.exe
+</code></pre></div></div>
+
+<p>Now we can copy the patched file to the RDP and run it:</p>
+
+<p><img src="../../images/flag-viewer.png" alt="" /></p>
+
+<p>I am pretty sure there is much more easier way to solve this challenge and I belive this isn’t intended way to solve it</p>]]></content><author><name>alphaz3r0</name></author><summary type="html"><![CDATA[Challenge Prompt]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Verify You Are Human</title><link href="http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human" rel="alternate" type="text/html" title="Huntress CTF 2025 - Verify You Are Human" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human"><![CDATA[<p><strong>Category:</strong> Malware</p>
 
 <h2 id="challenge-description">Challenge Description</h2>
 
@@ -1226,7 +1317,7 @@ Clean flag: flag<span class="o">{</span>d341b8d2c96e9cc96965afbf5675fc26<span cl
 
 <p>After accessing the site we see this:</p>
 
-<p><img src="../../_site/assets/alerts.png" alt="" /></p>
+<p><img src="../../images/alerts.png" alt="" /></p>
 
 <p>We can download the zip file.</p>
 

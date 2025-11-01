@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>Trust Me</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Trust Me | Writeups</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Trust Me" />
+<meta name="author" content="alphaz3r0" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Challenge Prompt" />
+<meta property="og:description" content="Challenge Prompt" />
+<link rel="canonical" href="http://localhost:4000/Trust-Me" />
+<meta property="og:url" content="http://localhost:4000/Trust-Me" />
+<meta property="og:site_name" content="Writeups" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-11-01T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Trust Me" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"alphaz3r0","url":"0x41414141-code.github.io"},"dateModified":"2025-11-01T00:00:00+01:00","datePublished":"2025-11-01T00:00:00+01:00","description":"Challenge Prompt","headline":"Trust Me","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/Trust-Me"},"url":"http://localhost:4000/Trust-Me"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    <h1>alphaz3r0@home:~$</h1>
+    </a>
+    <div class="header-links">
+      <a href="/archive"><h2 class="header-link">Archive</h2></a>
+<a href="/about"><h2 class="header-link">About</h2></a>
+
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>Trust Me</h2>
+  <time datetime="2025-11-01T00:00:00+01:00" class="by-line">01 Nov 2025</time>
+  <h2 id="challenge-prompt">Challenge Prompt</h2>
+
+<blockquote>
+  <p><em>C’mon bro, trust me! Just trust me!! Trust me bro!!!</em></p>
+
+  <p>The <strong><code class="language-plaintext highlighter-rouge">TrustMe.exe</code></strong> program on this Windows desktop <em>“doesn’t trust me?”</em></p>
+
+  <p>It says it will give me the flag, but only if I “have the permissions of <strong>Trusted Installer</strong>“…?</p>
+</blockquote>
+
+<hr />
+
+<h2 id="thought-process">Thought process:</h2>
+
+<p>We are give a RDP connection and there is a file <code class="language-plaintext highlighter-rouge">TrustMe.exe</code></p>
+
+<p>When we try to execute it we get this:</p>
+
+<p><img src="../../images/access_denied.png" alt="" /></p>
+
+<p>After searching for Trusted Installer, ctf and writeup</p>
+
+<p>I came accross this video from John Hammond:
+https://www.youtube.com/watch?v=Vj1uh89v-Sc</p>
+
+<p>But in that video he was able to just execute commands in cmd, so i transfer this file from rdp to my host machine and started static analysis.</p>
+
+<p>always make backup copy of the file you are working with to not mess with its integrity:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp TrustMe.exe TrustMe.exe.orig.exe
+cp TrustMe.exe TrustMe.exe.patched.exe
+</code></pre></div></div>
+
+<p>While doing static analysis i came across mentions of <code class="language-plaintext highlighter-rouge">C:\ctf\key.bin</code></p>
+
+<p>And then I remembered the video of John, the file is also “owned” by TrustedInstaller so we can use what we learned in that video to read it as  TrustedInstaller.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sc.exe config TrustedInstaller binpath= '"C:\Windows\System32\cmd.exe" /c type "C:\ctf\key.bin" &gt; "C:\Users\Public\key.bin"'
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>started the service 
+
+&gt; sc.exe start TrustedInstaller
+</code></pre></div></div>
+
+<p>And inspected the bytes:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># prints hex bytes
+Get-Content -Path C:\Users\Public\key.bin -Encoding Byte -ReadCount 0 |
+  ForEach-Object { ($_ | ForEach-Object { "{0:X2}" -f $_ }) -join " " }
+</code></pre></div></div>
+
+<p>And we get this:
+<code class="language-plaintext highlighter-rouge">C5C93BDB841534FAE5545EDCB0F12041D10CD4D90EE16A7D8235FA657C93825D</code></p>
+
+<p>AES key? That sounds important!</p>
+
+<p>But this was probably rabbit hole because there were 2 bytes missing from the encrypted string that is at the start of the file that i belive is encrypted flag “Wx6eETGXddnmCT4qZ7BxgRYpC+kdjjFzXxW+BM4HiI3GPaslpFBnpk9XplnaSxNg”</p>
+
+<p>Because after Decrypting the string with the key we get this
+<code class="language-plaintext highlighter-rouge">95d526595e62cf1f4d82a}</code></p>
+
+<p>After solving the challenge i checked and in fact it was the right flag just missing some characters for now I am not sure why.</p>
+
+<p>So now we are at the starting line again</p>
+
+<hr />
+
+<p>After going through disassembly code I found this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x140001468 cmp dword [IsMember], r14d 
+0x14000146d 75 31 jne 0x1400014a0
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">0x75 0x31</code> is <code class="language-plaintext highlighter-rouge">jne +0x31</code>. We could changed <code class="language-plaintext highlighter-rouge">0x75</code> → <code class="language-plaintext highlighter-rouge">0xEB</code> (opcode for <code class="language-plaintext highlighter-rouge">jmp short</code>) leaving the relative offset <code class="language-plaintext highlighter-rouge">0x31</code> unchanged. The two‑byte instruction length is preserved.</p>
+
+<p><strong>Byte-level change</strong>:</p>
+
+<ul>
+  <li>VA: <code class="language-plaintext highlighter-rouge">0x14000146d</code></li>
+  <li>Original bytes: <code class="language-plaintext highlighter-rouge">75 31</code></li>
+  <li>Patched bytes: <code class="language-plaintext highlighter-rouge">EB 31</code></li>
+</ul>
+
+<p>This will turns <code class="language-plaintext highlighter-rouge">jne 0x1400014a0</code> into <code class="language-plaintext highlighter-rouge">jmp 0x1400014a0</code> (i.e., unconditional branch to success block).</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>r2 -w -c 's 0x14000146d; px 2; wx eb; px 2; wq' TrustMe.exe.patched.exe
+</code></pre></div></div>
+
+<p>Now we can copy the patched file to the RDP and run it:</p>
+
+<p><img src="../../images/flag-viewer.png" alt="" /></p>
+
+<p>I am pretty sure there is much more easier way to solve this challenge and I belive this isn’t intended way to solve it</p>
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   
+
+  
+</body>
+
+</html>
