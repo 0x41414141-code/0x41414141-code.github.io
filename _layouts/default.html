@@ -1,7 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 {% include head.html %}
+  <style>
+    /* Force long lines in code blocks and inline code to wrap */
+    code, pre {
+        white-space: pre-wrap !important;       /* Wrap lines instead of scrolling */
+        word-wrap: break-word !important;       /* Break long words if needed */
+        overflow-wrap: break-word !important;   /* Extra safety */
+    }
 
+    /* Break very long unbroken strings inside <pre> */
+    pre code {
+        word-break: break-all !important;
+    }
+
+    code, pre {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+
+  /* ensure block flow and 100% width inside container */
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Rouge/highlight wrappers */
+.highlight, .highlight .highlight, .highlight pre {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible; /* allow wrapped lines to occupy height rather than create horizontal scroll */
+}
+
+/* Make inline code not force extra width */
+p code, li code, span code {
+  display: inline;      /* keep inline behavior but allow wrapping */
+  white-space: normal !important;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Make images responsive so they don't push layout wide */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Ensure main layout elements respect box-sizing and don't overflow */
+html, body, #wrapper, main.container, #main_content, article {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Last-resort: hide any tiny horizontal overflow so no blank space remains.
+   NOTE: this hides overflow; keep it if everything else looks fine. */
+body {
+  overflow-x: hidden;
+}
+  </style>
 <body>
   <div id="wrapper">
     {% include header.html %}

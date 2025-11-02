@@ -66,7 +66,7 @@ And we get this:
 
 AES key? That sounds important!
 
-But this was probably rabbit hole because there were 2 bytes missing from the encrypted string that is at the start of the file that i belive is encrypted flag "Wx6eETGXddnmCT4qZ7BxgRYpC+kdjjFzXxW+BM4HiI3GPaslpFBnpk9XplnaSxNg"
+But this was probably rabbit hole because there were 2 bytes missing from the encrypted string that is at the start of the file that i belive is encrypted flag `Wx6eETGXddnmCT4qZ7BxgRYpC+kdjjFzXxW+BM4HiI3GPaslpFBnpk9XplnaSxNg`
 
 Because after Decrypting the string with the key we get this
 `95d526595e62cf1f4d82a}`

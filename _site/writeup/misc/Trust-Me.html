@@ -32,7 +32,66 @@
 <!-- End Jekyll SEO tag -->
 
 </head>
+  <style>
+    /* Force long lines in code blocks and inline code to wrap */
+    code, pre {
+        white-space: pre-wrap !important;       /* Wrap lines instead of scrolling */
+        word-wrap: break-word !important;       /* Break long words if needed */
+        overflow-wrap: break-word !important;   /* Extra safety */
+    }
 
+    /* Break very long unbroken strings inside <pre> */
+    pre code {
+        word-break: break-all !important;
+    }
+
+    code, pre {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+
+  /* ensure block flow and 100% width inside container */
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Rouge/highlight wrappers */
+.highlight, .highlight .highlight, .highlight pre {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible; /* allow wrapped lines to occupy height rather than create horizontal scroll */
+}
+
+/* Make inline code not force extra width */
+p code, li code, span code {
+  display: inline;      /* keep inline behavior but allow wrapping */
+  white-space: normal !important;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Make images responsive so they don't push layout wide */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Ensure main layout elements respect box-sizing and don't overflow */
+html, body, #wrapper, main.container, #main_content, article {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Last-resort: hide any tiny horizontal overflow so no blank space remains.
+   NOTE: this hides overflow; keep it if everything else looks fine. */
+body {
+  overflow-x: hidden;
+}
+  </style>
 <body>
   <div id="wrapper">
     <header>
@@ -177,7 +236,7 @@ Get-Content -Path C:\Users\Public\key.bin -Encoding Byte -ReadCount 0 |
 
 <p>AES key? That sounds important!</p>
 
-<p>But this was probably rabbit hole because there were 2 bytes missing from the encrypted string that is at the start of the file that i belive is encrypted flag “Wx6eETGXddnmCT4qZ7BxgRYpC+kdjjFzXxW+BM4HiI3GPaslpFBnpk9XplnaSxNg”</p>
+<p>But this was probably rabbit hole because there were 2 bytes missing from the encrypted string that is at the start of the file that i belive is encrypted flag <code class="language-plaintext highlighter-rouge">Wx6eETGXddnmCT4qZ7BxgRYpC+kdjjFzXxW+BM4HiI3GPaslpFBnpk9XplnaSxNg</code></p>
 
 <p>Because after Decrypting the string with the key we get this
 <code class="language-plaintext highlighter-rouge">95d526595e62cf1f4d82a}</code></p>
