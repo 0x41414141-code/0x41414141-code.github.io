@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-02T08:10:52+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Arika</title><link href="http://localhost:4000/writeup/web/Arika" rel="alternate" type="text/html" title="Huntress CTF 2025 - Arika" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/web/Arika</id><content type="html" xml:base="http://localhost:4000/writeup/web/Arika"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-11-02T12:49:10+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Writeups</title><subtitle>Website where I will publish my writeups</subtitle><author><name>alphaz3r0</name><email></email></author><entry><title type="html">Huntress CTF 2025 - Arika</title><link href="http://localhost:4000/writeup/web/Arika" rel="alternate" type="text/html" title="Huntress CTF 2025 - Arika" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/web/Arika</id><content type="html" xml:base="http://localhost:4000/writeup/web/Arika"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
 
 <p>The Arika ransomware group likes to look slick and spiffy with their cool green-on-black terminal style website… but it sounds like they are worried about some security concerns of their own!</p>
 
@@ -148,7 +148,74 @@ flag: Zip archive data, at least v1.0 to extract, compression method=store
 <p>When we try to extract it we also see this comment:
 <code class="language-plaintext highlighter-rouge">Comment = The password is 5939f3ec9d820f23df20948af09a5682 .</code></p>
 
-<p>And <code class="language-plaintext highlighter-rouge">flag.txt</code> gets extracted - <code class="language-plaintext highlighter-rouge">flag{4d2a66c5ed8bb8cd4e4e1ab32c71f7a3}</code> :)</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Phasing Through Printers</title><link href="http://localhost:4000/writeup/misc/Phasing-Through-Printers" rel="alternate" type="text/html" title="Huntress CTF 2025 - Phasing Through Printers" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/misc/Phasing-Through-Printers</id><content type="html" xml:base="http://localhost:4000/writeup/misc/Phasing-Through-Printers"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
+<p>And <code class="language-plaintext highlighter-rouge">flag.txt</code> gets extracted - <code class="language-plaintext highlighter-rouge">flag{4d2a66c5ed8bb8cd4e4e1ab32c71f7a3}</code> :)</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Flag Checker</title><link href="http://localhost:4000/writeup/web/Flag-Checker" rel="alternate" type="text/html" title="Huntress CTF 2025 - Flag Checker" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/web/Flag-Checker</id><content type="html" xml:base="http://localhost:4000/writeup/web/Flag-Checker"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
+
+<blockquote>
+  <p>We’ve decided to make this challenge really straight forward. All you have to do is find out the flag!</p>
+
+  <p>Juuuust make sure not to trip any of the security controls implemented to stop brute force attacks…</p>
+</blockquote>
+
+<hr />
+<h2 id="thought-process">Thought process</h2>
+
+<p>After sending request and looking and responses and also knowing the flag format:</p>
+
+<p>I tested multiple scenarios and noticed one thing:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-s</span> <span class="nt">-D</span> - <span class="nt">-o</span> /dev/null http://10.1.221.57/submit?flag<span class="o">=</span>f
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+Date: Fri, 10 Oct 2025 14:53:10 GMT
+Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Content-Length: 2451
+Connection: keep-alive
+X-Response-Time: 0.101613
+
+curl <span class="nt">-s</span> <span class="nt">-D</span> - <span class="nt">-o</span> /dev/null http://10.1.221.57/submit?flag<span class="o">=</span>a
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+Date: Fri, 10 Oct 2025 14:53:13 GMT
+Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Content-Length: 2451
+Connection: keep-alive
+X-Response-Time: 0.001067
+
+curl <span class="nt">-s</span> <span class="nt">-D</span> - <span class="nt">-o</span> /dev/null http://10.1.221.57/submit?flag<span class="o">=</span>b
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+Date: Fri, 10 Oct 2025 14:54:06 GMT
+Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Content-Length: 2451
+Connection: keep-alive
+X-Response-Time: 0.001057
+
+</code></pre></div></div>
+
+<p>Notice anything that stands out. Lets try with this one, remember we know flag format is <code class="language-plaintext highlighter-rouge">flag\{[0-9a-f]{32}\}</code>
+So basically 32 characters of hex numbers between the {}</p>
+
+<p>Now look at these two requests:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-s</span> <span class="nt">-D</span> - <span class="nt">-o</span> /dev/null http://10.1.221.57/submit?flag<span class="o">=</span>flag
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+Date: Fri, 10 Oct 2025 14:56:39 GMT
+Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Content-Length: 2451
+Connection: keep-alive
+X-Response-Time: 0.401796
+
+curl <span class="nt">-s</span> <span class="nt">-D</span> - <span class="nt">-o</span> /dev/null http://10.1.221.57/submit?flag<span class="o">=</span><span class="nb">test
+</span>HTTP/1.1 200 OK
+Server: nginx/1.24.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+Date: Fri, 10 Oct 2025 14:56:46 GMT
+Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Content-Length: 2451
+Connection: keep-alive
+X-Response-Time: 0.000985
+</code></pre></div></div>
+
+<p>We can see that when a character is correct, the <code class="language-plaintext highlighter-rouge">X-Response-Time</code> has noticeably longer response time then the others(~0.1s). With this knowledge we can “bruteforce” the flag. So I wrote really bad script that tested all 0-9a-f and then when it found the character that has <code class="language-plaintext highlighter-rouge">X-Response-Time</code> greater then the others saves it and continues with the next character.</p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="web" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">Huntress CTF 2025 - Phasing Through Printers</title><link href="http://localhost:4000/writeup/misc/Phasing-Through-Printers" rel="alternate" type="text/html" title="Huntress CTF 2025 - Phasing Through Printers" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/misc/Phasing-Through-Printers</id><content type="html" xml:base="http://localhost:4000/writeup/misc/Phasing-Through-Printers"><![CDATA[<h2 id="challenge-description">Challenge Description</h2>
 
 <blockquote>
   <p>I found this printer on the network, and it seems to be running… a weird web page… to search for drivers?</p>
@@ -1481,41 +1548,4 @@ ENDCOMMAND
 
 <p>which when UUDecoded is:</p>
 
-<p><code class="language-plaintext highlighter-rouge">echo flag{69200c13dcb39de19a405e9d1f993821}</code></p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="misc" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry><entry><title type="html">PicoCTF - DISKO1</title><link href="http://localhost:4000/writeup/forensics/picoCTF-DISKO1" rel="alternate" type="text/html" title="PicoCTF - DISKO1" /><published>2025-11-01T00:00:00+01:00</published><updated>2025-11-01T00:00:00+01:00</updated><id>http://localhost:4000/writeup/forensics/picoCTF-DISKO1</id><content type="html" xml:base="http://localhost:4000/writeup/forensics/picoCTF-DISKO1"><![CDATA[<h1 id="writeup-disko-1">Writeup: DISKO 1</h1>
-
-<h2 id="challenge-description">Challenge Description</h2>
-<blockquote>
-  <p><em>Can you find the flag in this disk image?</em></p>
-</blockquote>
-
-<p><strong>Challenge Files:</strong> <code class="language-plaintext highlighter-rouge">disk-1.dd</code></p>
-
-<h2 id="initial-recon--analysis">Initial Recon &amp; Analysis</h2>
-<ul>
-  <li><strong>Tools needed:</strong> grep, strings</li>
-</ul>
-
-<h2 id="solution-walkthrough">Solution Walkthrough</h2>
-
-<h3 id="step-1-understanding-the-challenge">Step 1: Understanding the Challenge</h3>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Initial reconnaissance commands</span>
-file disko-1.dd
-
-disko-1.dd: DOS/MBR boot sector, code offset 0x58+2, OEM-ID <span class="s2">"mkfs.fat"</span>, Media descriptor 0xf8, sectors/track 32, heads 8, sectors 102400 <span class="o">(</span>volumes <span class="o">&gt;</span> 32 MB<span class="o">)</span>, FAT <span class="o">(</span>32 bit<span class="o">)</span>, sectors/FAT 788, serial number 0x241a4420, unlabeled
-
-</code></pre></div></div>
-
-<h3 id="step-2">Step 2:</h3>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>strings disko-1.dd | <span class="nb">grep</span> <span class="s1">'picoCTF{.*}$'</span>
-picoCTF<span class="o">{</span>1t5_ju5t_4_5tr1n9_be6031da<span class="o">}</span>
-</code></pre></div></div>
-
-<h2 id="flag">Flag</h2>
-
-<p><code class="language-plaintext highlighter-rouge">picoCTF{1t5_ju5t_4_5tr1n9_be6031da}</code></p>
-
-<h2 id="tools--references-used">Tools &amp; References Used</h2>
-<ul>
-  <li>strings</li>
-  <li>grep</li>
-</ul>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="forensics" /><summary type="html"><![CDATA[Writeup: DISKO 1]]></summary></entry></feed>
+<p><code class="language-plaintext highlighter-rouge">echo flag{69200c13dcb39de19a405e9d1f993821}</code></p>]]></content><author><name>alphaz3r0</name></author><category term="writeup" /><category term="misc" /><summary type="html"><![CDATA[Challenge Description]]></summary></entry></feed>

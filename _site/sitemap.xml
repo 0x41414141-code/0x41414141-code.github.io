@@ -9,6 +9,10 @@
 <lastmod>2025-11-01T00:00:00+01:00</lastmod>
 </url>
 <url>
+<loc>http://localhost:4000/writeup/web/Flag-Checker</loc>
+<lastmod>2025-11-01T00:00:00+01:00</lastmod>
+</url>
+<url>
 <loc>http://localhost:4000/writeup/misc/Phasing-Through-Printers</loc>
 <lastmod>2025-11-01T00:00:00+01:00</lastmod>
 </url>
@@ -41,6 +45,10 @@
 <lastmod>2025-11-01T00:00:00+01:00</lastmod>
 </url>
 <url>
+<loc>http://localhost:4000/writeup/pwn/pwn101</loc>
+<lastmod>2025-11-01T00:00:00+01:00</lastmod>
+</url>
+<url>
 <loc>http://localhost:4000/404</loc>
 </url>
 <url>
@@ -51,6 +59,9 @@
 </url>
 <url>
 <loc>http://localhost:4000/archive</loc>
+</url>
+<url>
+<loc>http://localhost:4000/</loc>
 </url>
 <url>
 <loc>http://localhost:4000/</loc>

