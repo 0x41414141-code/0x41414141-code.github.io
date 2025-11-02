@@ -121,9 +121,14 @@ def print_info(info):
     print(f"Content Length: {info['Content Length']} bytes")
     print("\nHeaders:")
     for header, value in info['Headers'].items():
-        print(f"  {header}: {value}")
+```
+```liquid
+{% raw %}
+print(f"  {header}: {value}")
+{% endraw %}
     print()
-
+```
+```python
 def main():
     base_url = "http://10.1.221.57/submit"
     #prefix ="77ba0346d9565e77344b9fe40ecf1369"
