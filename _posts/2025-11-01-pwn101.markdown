@@ -1,6 +1,6 @@
 ---
 layout: post
-title: pwn101
+title: TryHackMe - pwn101
 categories: writeup pwn
 permalink: :categories/:title
 ---

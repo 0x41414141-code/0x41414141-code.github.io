@@ -39,3 +39,22 @@ title: CTF Writeups
     <p>No PicoCTF challenges found yet.</p>
   {% endif %}
 </section>
+
+<section>
+  {% assign huntress_posts = site.posts | where_exp: "page", "page.title contains 'TryHackMe'" %}
+
+  {% if huntress_posts.size > 0 %}
+    <h2>TryHackMe Challenges</h2>
+    <ul>
+      {% for page in huntress_posts %}
+        <li>
+          <a href="{{ page.url | relative_url }}">
+            {{ page.title }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No PicoCTF challenges found yet.</p>
+  {% endif %}
+</section>
