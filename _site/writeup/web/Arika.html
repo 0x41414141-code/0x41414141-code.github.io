@@ -32,7 +32,29 @@
 <!-- End Jekyll SEO tag -->
 
 </head>
-  <style>
+<style>
+  /* Center the main content container */
+  #main_content {
+    max-width: 700px;    /* width of the content */
+    margin: 0 auto;      /* center horizontally */
+    padding: 20px;
+  }
+
+  /* All text inside aligns left */
+  #main_content * {
+    text-align: left;
+  }
+
+  /* Inline code styling */
+  p code, li code, span code {
+    display: inline;
+    white-space: normal !important;
+    max-width: 100%;
+    background: #f5f5f5;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+
     /* Force long lines in code blocks and inline code to wrap */
     code, pre {
         white-space: pre-wrap !important;       /* Wrap lines instead of scrolling */
@@ -45,53 +67,24 @@
         word-break: break-all !important;
     }
 
-    code, pre {
-  white-space: pre-wrap !important;
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
+  /* Make images responsive */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
 
-  /* ensure block flow and 100% width inside container */
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
+  /* Ensure main layout elements respect box-sizing and don't overflow */
+  html, body, #wrapper, main.container, article {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
 
-/* Rouge/highlight wrappers */
-.highlight, .highlight .highlight, .highlight pre {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  overflow: visible; /* allow wrapped lines to occupy height rather than create horizontal scroll */
-}
-
-/* Make inline code not force extra width */
-p code, li code, span code {
-  display: inline;      /* keep inline behavior but allow wrapping */
-  white-space: normal !important;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* Make images responsive so they don't push layout wide */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Ensure main layout elements respect box-sizing and don't overflow */
-html, body, #wrapper, main.container, #main_content, article {
-  box-sizing: border-box;
-  max-width: 100%;
-}
-
-/* Last-resort: hide any tiny horizontal overflow so no blank space remains.
-   NOTE: this hides overflow; keep it if everything else looks fine. */
-body {
-  overflow-x: hidden;
-}
-  </style>
+  /* Remove horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+</style>
 <body>
   <div id="wrapper">
     <header>
@@ -255,9 +248,8 @@ curl <span class="nt">-s</span> <span class="nt">-X</span> POST http://10.1.180.
     </main>
   </div>
 
-   
+  
 
   
 </body>
-
 </html>
