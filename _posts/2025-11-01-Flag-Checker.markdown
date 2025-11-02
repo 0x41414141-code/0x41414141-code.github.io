@@ -7,7 +7,7 @@ permalink: :categories/:title
 
 ---
 
-## Challenge Prompt
+## Challenge Description
 
 >We've decided to make this challenge really straight forward. All you have to do is find out the flag!
 >
@@ -121,14 +121,6 @@ def print_info(info):
     print(f"Content Length: {info['Content Length']} bytes")
     print("\nHeaders:")
     for header, value in info['Headers'].items():
-```
-```liquid
-{% raw %}
-print(f"  {header}: {value}")
-{% endraw %}
-    print()
-```
-```python
 def main():
     base_url = "http://10.1.221.57/submit"
     #prefix ="77ba0346d9565e77344b9fe40ecf1369"
