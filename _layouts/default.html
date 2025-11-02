@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
 {% include head.html %}
 <style>
   /* Center the main content container */
@@ -46,9 +49,19 @@
 
   /* Ensure main layout elements respect box-sizing and don't overflow */
   html, body, #wrapper, main.container, article {
-    box-sizing: border-box;
-    max-width: 100%;
+    max-width: 110%;
   }
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+img, iframe, video {
+    max-width: 100%;
+    height: auto;
+}
+
+
 
   /* Remove horizontal scroll */
   body {
