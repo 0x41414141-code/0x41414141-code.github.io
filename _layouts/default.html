@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 {% include head.html %}
 
 <body>
   <div id="wrapper">
     {% include header.html %}
-    <div class="container">
+    <main class="container" role="main">
       <section id="main_content">
         {{ content }}
       </section>
-    </div>
+    </main>
   </div>
 
   {% if paginator.total_pages > 1 %}
