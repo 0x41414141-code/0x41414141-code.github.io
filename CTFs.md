@@ -1,5 +1,6 @@
 ---
 layout: page
+title: CTF Writeups
 ---
 <section>
   {% assign huntress_posts = site.posts | where_exp: "page", "page.title contains 'Huntress CTF 2025'" %}
