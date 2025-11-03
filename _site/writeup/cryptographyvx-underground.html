@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="robots" content="index, follow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="generator" content="Jekyll">
+
+  <title>Huntress CTF 2025 - vx-underground</title>
+  <link rel="preconnect" href="https://0x41414141-code.github.io" crossorigin>
+  <link rel="dns-prefetch" href="https://0x41414141-code.github.io">
+
+<link rel="stylesheet" href="/css/main.css" media="all" onload="this.media='all'">
+
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Huntress CTF 2025 - vx-underground | Writeups</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Huntress CTF 2025 - vx-underground" />
+<meta name="author" content="alphaz3r0" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Challenge Prompt" />
+<meta property="og:description" content="Challenge Prompt" />
+<link rel="canonical" href="http://localhost:4000/writeup/cryptographyvx-underground" />
+<meta property="og:url" content="http://localhost:4000/writeup/cryptographyvx-underground" />
+<meta property="og:site_name" content="Writeups" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-11-01T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Huntress CTF 2025 - vx-underground" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"alphaz3r0","url":"0x41414141-code.github.io"},"dateModified":"2025-11-01T00:00:00+01:00","datePublished":"2025-11-01T00:00:00+01:00","description":"Challenge Prompt","headline":"Huntress CTF 2025 - vx-underground","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/writeup/cryptographyvx-underground"},"url":"http://localhost:4000/writeup/cryptographyvx-underground"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<style>
+  /* Center the main content container */
+  #main_content {
+    max-width: 700px;    /* width of the content */
+    margin: 0 auto;      /* center horizontally */
+  }
+
+  /* All text inside aligns left */
+  #main_content * {
+    text-align: left;
+  }
+
+  /* Inline code styling */
+  p code, li code, span code {
+    display: inline;
+    white-space: normal !important;
+    max-width: 100%;
+    background: #f5f5f5;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+
+    /* Force long lines in code blocks and inline code to wrap */
+    code, pre {
+        white-space: pre-wrap !important;       /* Wrap lines instead of scrolling */
+        word-wrap: break-word !important;       /* Break long words if needed */
+        overflow-wrap: break-word !important;   /* Extra safety */
+    }
+
+    /* Break very long unbroken strings inside <pre> */
+    pre code {
+        word-break: break-all !important;
+    }
+
+  /* Make images responsive */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    align-items: center;
+  }
+
+  /* Ensure main layout elements respect box-sizing and don't overflow */
+  html, body, #wrapper, main.container, article {
+    max-width: 110%;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+img, iframe, video {
+    max-width: 100%;
+    height: auto;
+}
+
+
+
+  /* Remove horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+</style>
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    <h1>alphaz3r0@home:~$</h1>
+    </a>
+    <div class="header-links">
+      <style>
+/* General nav styles */
+nav {
+  text-align: center;
+  margin: 10px 0;
+  position: relative;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  background: -webkit-linear-gradient(top, rgba(40,40,40,0.3), rgba(35,35,35,0.3) 50%, rgba(10,10,10,0.3) 50%, rgba(0,0,0,0.3));
+  padding: 8px 18px;
+  border-radius: 50px;
+  border: 2px solid rgba(0,0,0,0.7);
+  color: rgba(255,255,255,0.85);
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  text-decoration: none;
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.75);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  margin: 5px 2px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+  background: -webkit-linear-gradient(top, rgba(40,40,40,0.6), rgba(35,35,35,0.6) 50%, rgba(10,10,10,0.8) 50%, rgba(0,0,0,0.8));
+  transform: scale(1.05);
+}
+
+/* Hamburger icon */
+.hamburger {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .btn {
+    display: none; /* hide buttons by default on mobile */
+    width: 80%;
+    margin: 5px auto;
+  }
+
+  .hamburger {
+    display: block; /* show hamburger on mobile */
+  }
+
+  /* Show menu when active */
+  nav.active .btn {
+    display: block;
+  }
+}
+</style>
+
+<nav id="nav">
+  <div class="hamburger" onclick="toggleMenu()">☰</div>
+  <a class="btn" href="/">Home</a>
+  <a class="btn" href="/CTFs">CTFs</a>
+  <a class="btn" href="/about">About Me</a>
+  <a class="btn" href="/archive">Archive</a>
+</nav>
+
+<script>
+function toggleMenu() {
+  document.getElementById('nav').classList.toggle('active');
+}
+</script>
+
+    </div>
+  </div>
+</header>
+    <main class="container" role="main">
+      <section id="main_content">
+        <article>
+  <h2>Huntress CTF 2025 - vx-underground</h2>
+  <time datetime="2025-11-01T00:00:00+01:00" class="by-line">01 Nov 2025</time>
+  <h2 id="challenge-prompt">Challenge Prompt</h2>
+
+<blockquote>
+  <p>vx-underground, widely known across social media for hosting the largest collection and
+library of cat pictures, has been plagued since the dawn of time by people asking: <em>“what’s the password?”</em></p>
+
+  <p>Today, we ask the same question. We believe there are secrets shared amongst the cat pictures… but perhaps these also lead to just more cats.</p>
+
+  <p>Uncover the flag from the file provided.</p>
+</blockquote>
+
+<p>Provided: vx-underground.zip</p>
+
+<p>after extracting everything we have this folder structure:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.
+├── Cat Archive
+│   ├── 000b8a1b1806920c5cec4a0ae10ec048209dad7596cfce219b9c2c3e1dc7f5f4.jpg
+│   ├── 000c18880dc4af8a046aa78daeedf08e3fd575614df8e66e4cfbfd50a740ea77.jpg
+│   ├── 000cb28f57ae572ba83149b2163f9076cdb9660310a8bf2547a19816cf611775.jpg
+│   ├── 000cf1b3e38af81f673ca4ae37e0666137f84edd67f172c1f17d2333c3d521c0.jpg
+│   ├── 00a7c5ac8139f72f15ac31130effd5c3619561635f8b13ec4a2ee626fb627ab4.jpg
+│   ├── 00a91bd436455d4c73303f0d0a784660771dcc895989ad13942603d58ff798fe.jpg
+│   ├── 00a9a9bb5d68ed994e4ecdc69e550dfdd38d1b673b1bac2909de9901318b4627.jpg
+...
+...
+...
+│   ├── 0fec6482e1d3ca80d56675347e455f89149be2cd80d73d1e7a0c7e33876f8d21.jpg
+│   ├── 0fed52c4cae8b2f46e75b04d39c3767bf26defe90aaef808afa6a1e0c944c0d4.jpg
+│   └── 0ff8658055ea93f30482de8a990600c2f8a301a1a2632afbffda5f60cac2e1c5.jpg
+├── flag.zip
+├── prime_mod.jpg
+</code></pre></div></div>
+
+<p>Lots of images with cats and all of them are named 0-9a-f, hex digits.</p>
+
+<p>also there is one “special” image called prime_mod.jpg</p>
+
+<p>lets see metadata in that image:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>exiftool prime_mod.jpg
+ExifTool Version Number         : 13.36
+File Name                       : prime_mod.jpg
+Directory                       : .
+File Size                       : 43 kB
+File Modification Date/Time     : 2025:09:21 17:31:54+02:00
+File Access Date/Time           : 2025:10:17 16:25:15+02:00
+File Inode Change Date/Time     : 2025:10:17 16:25:15+02:00
+File Permissions                : -rw-------
+File Type                       : JPEG
+File Type Extension             : jpg
+MIME Type                       : image/jpeg
+JFIF Version                    : 1.01
+Resolution Unit                 : None
+X Resolution                    : 1
+Y Resolution                    : 1
+Exif Byte Order                 : Big-endian (Motorola, MM)
+User Comment                    : Prime Modulus: 010000000000000000000000000000000000000000000000000000000000000129
+Image Width                     : 400
+Image Height                    : 400
+Encoding Process                : Baseline DCT, Huffman coding
+Bits Per Sample                 : 8
+Color Components                : 3
+Y Cb Cr Sub Sampling            : YCbCr4:2:0 (2 2)
+Image Size                      : 400x400
+Megapixels                      : 0.160
+</code></pre></div></div>
+
+<p>Interestingly, there is a User Comment with the following content:</p>
+
+<p><code class="language-plaintext highlighter-rouge">Prime Modulus: 010000000000000000000000000000000000000000000000000000000000000129</code></p>
+
+<p>I will write it down maybe it will have some meaning later. Lets check if file is <code class="language-plaintext highlighter-rouge">Cat Archive</code>
+has anything interesting. Looking at exif data we see the pictures in <code class="language-plaintext highlighter-rouge">Cat Archive</code> also have User Comment. Lets use a little bash magic to get them:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>exiftool -UserComment Cat\ Archive/*
+
+.
+.
+.
+======== Cat Archive/0fed52c4cae8b2f46e75b04d39c3767bf26defe90aaef808afa6a1e0c944c0d4.jpg
+User Comment                    : 67-b24985d2b7c52aab8ccb58695c15d92c117936657f3fc0759cf94d3355e2f721
+.
+.
+.
+</code></pre></div></div>
+
+<p>Lets clean it a little and get just the comment:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>exiftool -UserComment Cat\ Archive/* | awk -F': ' '/User Comment/{print $2}'
+
+.
+.
+.
+145-2d9ab042a4bf21369ed72897366204feff54359585275a09ab64975c43304962
+415-0551477bacb1ac94a91466ffa3d96e67940afde60ff0dc79d928609a55fccfe2
+363-49387f88c14c828683bdd189bcf975e384a6ae2f897e1d135814a92e539da785
+35-fd90c306d0873404616dfee1bc087a4a57e7ba39983465f9f560359049344e5b
+.
+.
+.
+</code></pre></div></div>
+
+<p>They all follow similar pattern</p>
+
+<p>[decimal number 1-457] - [hex digit]</p>
+
+<p>lets sort them by “index”, that first number before the <code class="language-plaintext highlighter-rouge">-</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>exiftool -UserComment Cat\ Archive/* | awk -F': ' '/User Comment/{print $2}' | sort -n -t'-' -k1
+
+Full output:
+1-d278c2aad8f1c0de7023b4ec81df35fd9515a4330d5db48fda746c0548c200f5
+2-60cf3885dabd878c2f24cd503b02db29c7c2dfdad310a8ec9c0d826b8d84ff2f
+3-f84c72ebf84336085a6f1013ccff8cd987a0baa1c6d5c0fb650b14b4daf6ca2f
+4-b2ebc1f2cc12460fbafb34975e12ecb4e0d5c6fde61ed64ae8c6c99a97c11cb3
+...
+...
+...
+455-56eaeded414bf121289177661c058aa1e8deb3a89a19885f7fa5e913975ba88a
+456-4fefbf3da59a94e75643e606e20ca5964127b18132256086f25befaaf18207d7
+457-0226a02be955ed20683f76e4ff7f3358c9657e73d210c874d0c0fec0de8d9dc5
+</code></pre></div></div>
+
+<p>So after knowing that we have Prime modulus, and lots of hex strings, there is one really important hint in the description of the challenge: <code class="language-plaintext highlighter-rouge">there are secrets shared</code>
+After researching google for sometime and combining multiple keywords we come accross something really interesting: <code class="language-plaintext highlighter-rouge">Shamir's Secret Sharing</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Shamir's Secret Sharing (SSS) is ==a cryptographic method that divides a secret into multiple parts, or "shares," which are distributed among different parties==. The secret can only be reconstructed when a minimum, predetermined number of shares (the "threshold") are combined, ensuring that no single party can access the secret on its own.
+</code></pre></div></div>
+
+<p>This really looks like our problem: one prime modulus and multiple secrets (hex values).</p>
+
+<p>After saving those hex values to a file, we can implement the algorithm above to see if this is the case:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
+</span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
+
+<span class="n">shares</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">"hash.txt"</span><span class="p">,</span> <span class="s">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="s">'-'</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">idx_str</span><span class="p">,</span> <span class="n">hex_val</span> <span class="o">=</span> <span class="n">line</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">'-'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">idx_str</span><span class="p">)</span>
+            <span class="n">shares</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hex_val</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Fallback if line is hex only
+</span>            <span class="n">shares</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">shares</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+
+<span class="n">prime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s">"010000000000000000000000000000000000000000000000000000000000000129"</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">modinv</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">pow</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">recover_secret</span><span class="p">(</span><span class="n">shares</span><span class="p">,</span> <span class="n">prime</span><span class="p">):</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">shares</span><span class="p">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">secret</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+        <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="o">=</span> <span class="n">i</span><span class="p">,</span> <span class="n">shares</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">den</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">!=</span> <span class="n">i</span><span class="p">:</span>
+                <span class="n">num</span> <span class="o">=</span> <span class="p">(</span><span class="n">num</span> <span class="o">*</span> <span class="o">-</span><span class="n">j</span><span class="p">)</span> <span class="o">%</span> <span class="n">prime</span>
+                <span class="n">den</span> <span class="o">=</span> <span class="p">(</span><span class="n">den</span> <span class="o">*</span> <span class="p">(</span><span class="n">xi</span> <span class="o">-</span> <span class="n">j</span><span class="p">))</span> <span class="o">%</span> <span class="n">prime</span>
+        <span class="n">term</span> <span class="o">=</span> <span class="n">yi</span> <span class="o">*</span> <span class="n">num</span> <span class="o">*</span> <span class="n">modinv</span><span class="p">(</span><span class="n">den</span><span class="p">,</span> <span class="n">prime</span><span class="p">)</span>
+        <span class="n">secret</span> <span class="o">=</span> <span class="p">(</span><span class="n">secret</span> <span class="o">+</span> <span class="n">term</span><span class="p">)</span> <span class="o">%</span> <span class="n">prime</span>
+    <span class="k">return</span> <span class="n">secret</span>
+
+<span class="n">secret</span> <span class="o">=</span> <span class="n">recover_secret</span><span class="p">(</span><span class="n">shares</span><span class="p">,</span> <span class="n">prime</span><span class="p">)</span>
+<span class="n">secret_bytes</span> <span class="o">=</span> <span class="n">secret</span><span class="p">.</span><span class="n">to_bytes</span><span class="p">((</span><span class="n">secret</span><span class="p">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span> <span class="s">"big"</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"Recovered secret (hex):"</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Recovered secret (bytes):"</span><span class="p">,</span> <span class="n">secret_bytes</span><span class="p">)</span>
+
+<span class="c1"># Output:
+</span><span class="n">Recovered</span> <span class="n">secret</span> <span class="p">(</span><span class="nb">hex</span><span class="p">):</span> <span class="mh">0x2a5a49502070617373776f72643a20464170656b4a21794a363959616a5773</span>
+<span class="n">Recovered</span> <span class="n">secret</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">):</span> <span class="sa">b</span><span class="s">'*ZIP password: FApekJ!yJ69YajWs'</span>
+
+</code></pre></div></div>
+
+<p>After we run it the output is <code class="language-plaintext highlighter-rouge">ZIP password: FApekJ!yJ69YajWs</code> so we can now unzip the file and get our flag</p>
+
+<p>But when we <code class="language-plaintext highlighter-rouge">cat</code> flag.txt we are met with lots of line like this</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>MeowMeow;MeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeow;Meow;;MeowMeow;MeowMeow;MeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeow;Meow;;MeowMeow;MeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeowMeow;Meow;;
+</code></pre></div></div>
+
+<p>After researching what it could mean we find out it is some kind of esoteric language:</p>
+
+<p>There are probably decoders for esoteric languages online, but I wrote my own script:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#!/usr/bin/env python3
+from pathlib import Path
+
+def decode_meowmeow(code):
+    """
+    MeowMeow esoteric language decoder
+    Meow = instruction separator
+    ; = statement separator
+    Number of 'Meow's = different instructions
+    """
+    statements = code.split(';;')
+    output = []
+
+    for statement in statements:
+        parts = statement.split(';')
+        if len(parts) &gt;= 2:
+            meow_count = parts[1].count('Meow') // 4  # Count groups of 'Meow'
+            if meow_count &gt; 0:
+                output.append(chr(meow_count))
+
+    return ''.join(output)
+
+
+def simple_meow_decode(code):
+    """Count 'Meow' occurrences between semicolons"""
+    parts = code.split(';;')
+    result = []
+
+    for part in parts:
+        sections = part.split(';')
+        for section in sections:
+            if section.strip():
+                count = section.count('Meow')
+                if 32 &lt;= count &lt;= 126:  # Printable ASCII range
+                    result.append(chr(count))
+
+    return ''.join(result)
+
+
+# Use pathlib for a safe, cross-platform path
+file_path = Path.cwd() / 'cute-kitty-noises.txt'
+
+with file_path.open('r') as f:
+    meow_code = f.read()
+
+print("[*] Decoding MeowMeow language...")
+
+decoded = simple_meow_decode(meow_code)
+print(f"[+] Decoded password: {decoded}")
+</code></pre></div></div>
+
+<p>After running it, we get:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[*] Decoding MeowMeow language...
+[+] Decoded password: malware is illegal and for nerdscats are cool and badass
+flag{35dcba13033459ca799ae2d990d33dd3}
+</code></pre></div></div>
+
+</article>
+      </section>
+    </main>
+  </div>
+
+  
+
+  
+</body>
+</html>
