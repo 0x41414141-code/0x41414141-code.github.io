@@ -9,7 +9,7 @@ permalink: :categories/:title
 > *This should give you a start: 'AAAAAAAAAAA'
 > Challenge is running on port **9001***
 
-**Provided:
+**Provided:**
 IP:  `10.10.14.244`
 Files: `pwn101.pwn101`
 
@@ -113,7 +113,7 @@ Distance:
 
 ## Solution
 
-Now that we know how much the distance is we can write simple script that will calculate that print characters until it overflows the buffer.
+Now that we know how much the distance is we can write simple script that will calculate and print characters until it overflows the buffer.
 
 ```python
 from pwn import *
