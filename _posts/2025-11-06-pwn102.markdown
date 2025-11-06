@@ -1,6 +1,6 @@
 ---
 layout: post
-tit: TryHackMe - pwn102
+title: TryHackMe - pwn102
 categories: writeup pwn
 permalink: :categories/:title
 ---
