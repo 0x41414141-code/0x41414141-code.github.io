@@ -115,5 +115,7 @@ p.interactive()
 ## Tools & References Used
 
 pwntools documentation - https://docs.pwntools.com/en/stable/
+
 Ghidra (for decompilation)
+
 checksec
