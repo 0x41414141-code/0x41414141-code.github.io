@@ -41,12 +41,12 @@ title: CTF Writeups
 </section>
 
 <section>
-  {% assign huntress_posts = site.posts | where_exp: "page", "page.title contains 'TryHackMe'" %}
+  {% assign htb_posts = site.posts | where: "categories", "hackthebox" %}
 
-  {% if huntress_posts.size > 0 %}
-    <h2>TryHackMe Challenges</h2>
+  {% if htb_posts.size > 0 %}
+    <h2>HackTheBox Machines</h2>
     <ul>
-      {% for page in huntress_posts %}
+      {% for page in htb_posts %}
         <li>
           <a href="{{ page.url | relative_url }}">
             {{ page.title }}
@@ -55,6 +55,25 @@ title: CTF Writeups
       {% endfor %}
     </ul>
   {% else %}
-    <p>No PicoCTF challenges found yet.</p>
+    <p>No HackTheBox machines found yet.</p>
+  {% endif %}
+</section>
+
+<section>
+  {% assign thm_posts = site.posts | where_exp: "page", "page.title contains 'TryHackMe'" %}
+
+  {% if thm_posts.size > 0 %}
+    <h2>TryHackMe Challenges</h2>
+    <ul>
+      {% for page in thm_posts %}
+        <li>
+          <a href="{{ page.url | relative_url }}">
+            {{ page.title }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No TryHackMe challenges found yet.</p>
   {% endif %}
 </section>
