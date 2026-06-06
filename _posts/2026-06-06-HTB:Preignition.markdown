@@ -83,7 +83,7 @@ Gobuster finds **admin.php** with a `200 OK` response — the page exists and is
 
 Navigating to `http://$IP/admin.php` reveals a login form.
 
-![admin.php login page](/assets/posts/preignition/admin-login.png)
+![admin.php login page](../../assets/admin-page.png)
 
 Before reaching for any brute-forcing tool, it's worth testing default credentials. Many web applications ship with default admin logins that never get changed — a misconfiguration that causes real breaches in production environments.
 
